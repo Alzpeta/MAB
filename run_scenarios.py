@@ -2,6 +2,8 @@ from datetime import datetime
 from pathlib import Path
 import json
 import os
+import sys
+import time
 
 Path("outputs/matplotlib_cache").mkdir(parents=True, exist_ok=True)
 os.environ.setdefault(
@@ -32,11 +34,100 @@ SCENARIOS = {
 }
 
 
-def make_output_dir():
+def configure_run():
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = Path("outputs") / f"mab_run_{timestamp}"
-    output_dir.mkdir(parents=True, exist_ok=True)
+    run_name = "mab_run_occupancy_pressure"
+
+    config_overrides = {
+
+        # "N_CUSTOMERS": 5000,
+        # "N_RUNS": 5,
+        # "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+        # "SEED": 33,
+    }
+
+    scenarios = SCENARIOS
+
+    return run_name, config_overrides, scenarios
+
+
+def apply_config_overrides(config_overrides):
+
+    unknown_keys = sorted(
+        key
+        for key in config_overrides
+        if key not in mab.CONFIG
+    )
+
+    if unknown_keys:
+        raise KeyError(
+            "Unknown CONFIG override(s): "
+            + ", ".join(unknown_keys)
+        )
+
+    mab.CONFIG.update(config_overrides)
+    np.random.seed(mab.CONFIG["SEED"])
+
+
+def format_duration(seconds):
+
+    seconds = int(seconds)
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+
+    if hours:
+        return f"{hours:d}:{minutes:02d}:{seconds:02d}"
+
+    return f"{minutes:02d}:{seconds:02d}"
+
+
+def print_progress(label, current, total, start_time):
+
+    elapsed = time.time() - start_time
+    progress = current / total if total else 1
+    bar_width = 28
+    filled_width = int(bar_width * progress)
+    bar = "#" * filled_width + "-" * (bar_width - filled_width)
+    percent = progress * 100
+    runs_per_second = current / elapsed if elapsed > 0 else 0
+
+    if current and runs_per_second:
+        eta = (total - current) / runs_per_second
+    else:
+        eta = 0
+
+    message = (
+        f"\r{label} "
+        f"[{bar}] "
+        f"{current}/{total} "
+        f"({percent:5.1f}%) | "
+        f"{runs_per_second:.2f} runs/s | "
+        f"elapsed {format_duration(elapsed)} | "
+        f"eta {format_duration(eta)}"
+    )
+
+    sys.stdout.write(message)
+    sys.stdout.flush()
+
+    if current >= total:
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+
+
+def make_output_dir(run_name=None):
+
+    if run_name is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        run_name = f"mab_run_{timestamp}"
+
+    output_dir = Path("outputs") / run_name
+
+    if output_dir.exists():
+        raise FileExistsError(
+            f"Output directory already exists: {output_dir}"
+        )
+
+    output_dir.mkdir(parents=True)
 
     return output_dir
 
@@ -195,6 +286,10 @@ def run_scenario(scenario_name, restaurant_tiers):
 
             run_rewards = []
             run_option_results = []
+            progress_label = (
+                f"{scenario_name} | top-k={k} | {agent_name:<20}"
+            )
+            progress_started_at = time.time()
 
             for run in range(mab.CONFIG["N_RUNS"]):
 
@@ -207,6 +302,13 @@ def run_scenario(scenario_name, restaurant_tiers):
                 run_rewards.append(mean_reward)
                 option_stats_df["run"] = run
                 run_option_results.append(option_stats_df)
+
+                print_progress(
+                    progress_label,
+                    run + 1,
+                    mab.CONFIG["N_RUNS"],
+                    progress_started_at
+                )
 
             option_results_df = pd.concat(
                 run_option_results,
@@ -303,11 +405,13 @@ def run_scenario(scenario_name, restaurant_tiers):
     )
 
 
-def save_config(output_dir):
+def save_config(output_dir, run_name, config_overrides, scenarios):
 
     config_output = {
+        "run_name": run_name,
+        "config_overrides": config_overrides,
         "config": mab.CONFIG,
-        "scenarios": SCENARIOS,
+        "scenarios": scenarios,
         "agents": list(mab.AGENTS.keys()),
         "options": mab.ALL_OPTIONS,
         "restaurant_configs": mab.RESTAURANT_CONFIGS,
@@ -700,13 +804,16 @@ def plot_overall_result_heatmap(all_results_df, output_dir):
 
 def main():
 
-    output_dir = make_output_dir()
-    save_config(output_dir)
+    run_name, config_overrides, scenarios = configure_run()
+    apply_config_overrides(config_overrides)
+
+    output_dir = make_output_dir(run_name)
+    save_config(output_dir, run_name, config_overrides, scenarios)
 
     scenario_results = []
     scenario_option_results = []
 
-    for scenario_name, restaurant_tiers in SCENARIOS.items():
+    for scenario_name, restaurant_tiers in scenarios.items():
 
         scenario_dir = output_dir / scenario_name
         scenario_dir.mkdir()

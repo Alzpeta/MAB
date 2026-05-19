@@ -41,11 +41,11 @@ CONFIG = {
 
     "N_CUSTOMERS": 20000,
 
-    "N_RUNS": 20,
+    "N_RUNS": 100,
 
     "SEED": 33,
 
-    "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    "N_SHOWN_OPTIONS_LIST": [1,2,3,4,5],
 
     # ========================================================
     # RESTAURANTS
@@ -73,10 +73,12 @@ CONFIG = {
     "WEEKEND_OCCUPANCY_BOOST": 0.25,
 
     "TIER_BASE_OCCUPANCY": {
-
-        "budget": 0.45,
-        "midrange": 0.60,
-        "premium": 0.75,
+            "budget": 0.70,
+            "midrange": 0.82,
+            "premium": 0.92,
+        # "budget": 0.45,
+        # "midrange": 0.60,
+        # "premium": 0.75,
     },
 
     # ========================================================

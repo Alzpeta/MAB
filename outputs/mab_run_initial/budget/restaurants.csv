@@ -1,0 +1,6 @@
+restaurant_id,name,tier,allowed_options
+0,Lacny Tanier,budget,"discount_20pct, same_day_30min, same_day_60min, 30min_plus_5pct, 45min_plus_10pct, 30min_plus_drink, 60min_plus_10pct_plus_dessert"
+1,U Hladneho Vlka,budget,"discount_15pct, same_day_15min, same_day_45min, 30min_plus_5pct_plus_drink, 60min_plus_15pct, free_drink, priority_future_booking"
+2,Treska & Sen,budget,"discount_20pct, same_day_30min, same_day_90min, 45min_plus_10pct, 90min_plus_20pct, free_drink, 60min_plus_dessert"
+3,Kapustovy Dom,budget,"discount_15pct, same_day_15min, same_day_60min, 30min_plus_5pct, 60min_plus_15pct, free_dessert, 30min_plus_drink"
+4,Rychla Bryndza,budget,"discount_20pct, same_day_45min, same_day_90min, 45min_plus_10pct, 90min_plus_20pct, free_appetizer, 60min_plus_10pct_plus_dessert"
