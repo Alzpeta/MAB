@@ -32,6 +32,17 @@ import matplotlib.pyplot as plt
 # ============================================================
 # CONFIG
 # ============================================================
+"""
+   jeden run = vygeneruje se cely environment, probehne vsech 20 000 customers, agent se postupne uci
+   v kazdem runu se znova vygeneruji novy customers, tzn maji jine vlastnosti
+   je jina occupancy
+   jiny behavioral noise
+   ty agenti maji jine chovani
+   tzn jeden run muzou byt ti customers ze berou vsechno, jednou ze nic a ve vysledkyu je prumer
+   
+   "EVENING_OCCUPANCY_BOOST": 0.35, o kolik se vecer zvysi obsazenost restaurace
+pouziva se jen pri generovani?
+   """
 
 CONFIG = {
 
@@ -41,11 +52,11 @@ CONFIG = {
 
     "N_CUSTOMERS": 20000,
 
-    "N_RUNS": 100,
+    "N_RUNS": 100, # pocet behu pro kazdou strategii - pak se udela prumer
 
     "SEED": 33,
 
-    "N_SHOWN_OPTIONS_LIST": [1,2,3,4,5],
+    "N_SHOWN_OPTIONS_LIST": [1,2,3,5],
 
     # ========================================================
     # RESTAURANTS
@@ -66,30 +77,35 @@ CONFIG = {
 
     "EVENING_PEAK_HOURS": [18, 19, 20, 21],
 
-    "EVENING_OCCUPANCY_BOOST": 0.35,
+    "EVENING_OCCUPANCY_BOOST": 0.20, #uprava z 0.35 jinak bylo skoro vzdy vecer full u premium
 
-    "WEEKEND_DAYS": [4, 5],
+    "WEEKEND_DAYS": [4, 5], #patek, sobota, indexujeme od 0
 
-    "WEEKEND_OCCUPANCY_BOOST": 0.25,
+    "WEEKEND_OCCUPANCY_BOOST": 0.15, #uprava z 0.20 na 0,1 jinak o vikendu furt full
 
     "TIER_BASE_OCCUPANCY": {
-            "budget": 0.70,
-            "midrange": 0.82,
-            "premium": 0.92,
-        # "budget": 0.45,
-        # "midrange": 0.60,
-        # "premium": 0.75,
+            # "budget": 1.0,
+            # "midrange": 1.0,
+            # "premium": 1.0,
+        "budget": 0.45,
+        "midrange": 0.60,
+        "premium": 0.75,
     },
 
     # ========================================================
     # BANDIT SETTINGS
     # ========================================================
 
-    "INITIAL_ACCEPTANCE_ESTIMATE": 0.15,
+    "INITIAL_ACCEPTANCE_ESTIMATE": 0.15, #pocatecni odhad rewardu pro kazdy arm
 
+    #kdyz dame treba 50, bude to strasne optimisticky a bude dlouho explorovat, protoze ocekava vysoke rewardy
+    # 0,1 zase bude prilis brzo exploitovat
+    #tohle by nemelo moc ovlivnovat thompson
     # ========================================================
     # CUSTOMER DISTRIBUTIONS
     # ========================================================
+
+    #np.random.normal(mean, std) tady pak pouzity, generujeme to dle nahodneho rozdeleni
 
     "DISCOUNT_AFFINITY_MEAN": 0.5,
     "DISCOUNT_AFFINITY_STD": 0.2,
@@ -110,34 +126,60 @@ CONFIG = {
     # ACCEPTANCE MODEL
     # ========================================================
 
-    "BASE_UTILITY": -2.0,
+    #aka jak customer dela ta rozhodnuti
 
-    "DISCOUNT_WEIGHT": 3.0,
+    "BASE_UTILITY": -2.0, #aka vychozi nalada, customer nechce defaultne prijmout alternativu
+    #je nastvany, protoze nema rezervaci, takze jde do toho s negativni naladou a musime ho presvedcovat
+    #-5 uz by nas poslal nekam, 0 bude spis vse prijimat
 
-    "TIME_SHIFT_WEIGHT": 2.5,
+    #tohle je zalozeno na utility based choice modeling
+    #clovek ma nejakou utility podle ktere se rozhoduje, je to klasicky v ekonometrii, behavioral modelingu atp
+    # U=β0+β1x1+β2x2+...
+    # x jsou vahy, b jsou preferencni features
+    #logistic mapping je zas pak klasicky vzorec co se pouziva kde se to pouzije
+    # k tomu utility se pak pridav noise, protoze lidske chovani neni perfektne deterministicke
+    # random utility theory.
 
-    "PERK_WEIGHT": 1.0,
+    #tohle dal jsou parametry naseho syntetickeho sveta
+    #nekteri lidi miluji slevy, nekdo specha, nekdo je flexibilni, nekdo ma radsi bonus nez slevu,
+    #loayalni customers snesou vic
+    #"custom utility-based synthetic user simulator"
+    "DISCOUNT_WEIGHT": 3.0, #jak moc zakaznici ocenuji slevu
 
-    "LOYALTY_WEIGHT": 0.1,
+    "TIME_SHIFT_WEIGHT": 2.5, #jak moc lidem vadi delay
 
-    "URGENCY_DELAY_WEIGHT": 2.0,
+    "PERK_WEIGHT": 1.0, #jak moc funguji bonusy (perky) [free piti atp]
+        #tzn min to funguje jak discount
+    "LOYALTY_WEIGHT": 0.1, #maly bonus za loyal customer behavior, pokud ma customer rad restiku, bude trosicku tolerantnejsi
 
-    "EVENING_DELAY_PENALTY": 0.7,
 
-    "GROUP_DELAY_PENALTY": 0.7,
+    "URGENCY_DELAY_WEIGHT": 2.0, #urgency delay - tem co jsou urgent bude cekani mega vadit
 
-    "NOISE_STD": 0.6,
+
+    "EVENING_DELAY_PENALTY": 0.7, # ti co si to zarezervuji vecer budou min flexibilni, rpotoze vic vazane socialne atp
+
+    "GROUP_DELAY_PENALTY": 0.7, # velke skupiny hur toleruji delay
+
+    "NOISE_STD": 0.6, # mira nepredvidatelnosti lidskeho chovani
 
     # ========================================================
     # NORMALIZATION
     # ========================================================
 
-    "TIME_SHIFT_NORMALIZER": 1440,
+    "TIME_SHIFT_NORMALIZER": 1440, #normalizace timeshiftu- je to na 24 hod == 1440 minut
 
     # ========================================================
     # ACCEPTANCE PROBABILITY CLIPPING
     # ========================================================
 
+    #ochrana proti extremum
+    #kdyz probability vyjde jako 0,0000001, clipne se to na 0,01
+    # kdyz 0.9999999 tak na 0.95
+    #jinak by nektere offers byly temer vzdy akceptoatelen a nektere nikdy
+    #tzn skoro deterministicke situace
+    #pak by to bylo pro banditu moc easy
+    #kdyby to davalo 0,999 tak by po tom sel vzdy
+    #zadna nabidka neni uplne stopro success a zaroven zadna neni impossible
     "MIN_ACCEPTANCE_PROBABILITY": 0.01,
     "MAX_ACCEPTANCE_PROBABILITY": 0.95,
 }
@@ -149,34 +191,17 @@ np.random.seed(CONFIG["SEED"])
 # OPTION CATALOG
 # ============================================================
 
+#menim timeshift na cele hours, protoze zbytek kodu je nastaveny na cele hours a nedava to dal smysl
+#samotny options muzou byt matematicky lepsi, ale nesmi byt akto ve stejne restauraci!!!!
+#TODO: vic matematicky stejnych options, jinak to proste je psycho sestavit + LLM to nezvladaji
 ALL_OPTIONS = {
 
-    "same_day_15min": {
-        "time_shift": 15,
-        "discount": 0.00,
-        "perk_value": 0.00,
-    },
-
-    "same_day_30min": {
-        "time_shift": 30,
-        "discount": 0.00,
-        "perk_value": 0.00,
-    },
-
-    "same_day_45min": {
-        "time_shift": 45,
-        "discount": 0.00,
-        "perk_value": 0.00,
-    },
+    # -------------------------
+    # PURE TIME SHIFTS
+    # -------------------------
 
     "same_day_60min": {
         "time_shift": 60,
-        "discount": 0.00,
-        "perk_value": 0.00,
-    },
-
-    "same_day_90min": {
-        "time_shift": 90,
         "discount": 0.00,
         "perk_value": 0.00,
     },
@@ -187,12 +212,44 @@ ALL_OPTIONS = {
         "perk_value": 0.00,
     },
 
+    "same_day_180min": {
+        "time_shift": 180,
+        "discount": 0.00,
+        "perk_value": 0.00,
+    },
+
+    # -------------------------
+    # NEXT DAY OFFERS
+    # -------------------------
     "next_day_same_time": {
         "time_shift": 1440,
         "discount": 0.00,
         "perk_value": 0.00,
     },
 
+    "next_day_plus_10pct": {
+        "time_shift": 1440,
+        "discount": 0.10,
+        "perk_value": 0.00,
+    },
+
+    "next_day_plus_vip": {
+        "time_shift": 1440,
+        "discount": 0.00,
+        "perk_value": 0.35,
+    },
+
+    "next_day_plus_20pct": {
+        "time_shift": 1440,
+        "discount": 0.20,
+        "perk_value": 0.00,
+    },
+    # -------------------------
+    # PURE DISCOUNTS
+    # IMPORTANT:
+    # only one pure discount
+    # should exist per restaurant
+    # -------------------------
     "discount_5pct": {
         "time_shift": 0,
         "discount": 0.05,
@@ -217,45 +274,42 @@ ALL_OPTIONS = {
         "perk_value": 0.00,
     },
 
+    # -------------------------
+    # PURE PERKS
+    # intentionally NOT ordered
+    # linearly to avoid dominance
+    # -------------------------
     "free_drink": {
         "time_shift": 0,
         "discount": 0.00,
-        "perk_value": 0.20,
+        "perk_value": 0.18,
     },
 
     "free_dessert": {
         "time_shift": 0,
         "discount": 0.00,
-        "perk_value": 0.30,
-    },
-
-    "free_appetizer": {
-        "time_shift": 0,
-        "discount": 0.00,
-        "perk_value": 0.35,
+        "perk_value": 0.28,
     },
 
     "vip_table_upgrade": {
         "time_shift": 0,
         "discount": 0.00,
-        "perk_value": 0.45,
+        "perk_value": 0.34,
     },
 
     "priority_future_booking": {
         "time_shift": 0,
         "discount": 0.00,
-        "perk_value": 0.10,
+        "perk_value": 0.22,
     },
 
-    "30min_plus_5pct": {
-        "time_shift": 30,
+    # -------------------------
+    # DELAY + DISCOUNT
+    # -------------------------
+
+    "60min_plus_5pct": {
+        "time_shift": 60,
         "discount": 0.05,
-        "perk_value": 0.00,
-    },
-
-    "45min_plus_10pct": {
-        "time_shift": 45,
-        "discount": 0.10,
         "perk_value": 0.00,
     },
 
@@ -265,52 +319,78 @@ ALL_OPTIONS = {
         "perk_value": 0.00,
     },
 
-    "90min_plus_20pct": {
-        "time_shift": 90,
+    "120min_plus_10pct": {
+        "time_shift": 120,
+        "discount": 0.10,
+        "perk_value": 0.00,
+    },
+
+    "180min_plus_15pct": {
+        "time_shift": 180,
+        "discount": 0.15,
+        "perk_value": 0.00,
+    },
+
+    "180min_plus_20pct": {
+        "time_shift": 180,
         "discount": 0.20,
         "perk_value": 0.00,
     },
 
-    "30min_plus_drink": {
-        "time_shift": 30,
-        "discount": 0.00,
-        "perk_value": 0.20,
-    },
+    # -------------------------
+    # DELAY + PERK
+    # -------------------------
 
-    "60min_plus_dessert": {
+    "60min_plus_drink": {
         "time_shift": 60,
         "discount": 0.00,
-        "perk_value": 0.30,
+        "perk_value": 0.18,
     },
 
-    "90min_plus_appetizer": {
-        "time_shift": 90,
+    "60min_plus_vip": {
+        "time_shift": 60,
         "discount": 0.00,
-        "perk_value": 0.35,
+        "perk_value": 0.34,
     },
 
-    "next_day_plus_vip": {
-        "time_shift": 1440,
+    "120min_plus_dessert": {
+        "time_shift": 120,
         "discount": 0.00,
-        "perk_value": 0.45,
+        "perk_value": 0.28,
     },
 
-    "30min_plus_5pct_plus_drink": {
-        "time_shift": 30,
+    # -------------------------
+    # MIXED TRADEOFFS
+    # -------------------------
+
+    "60min_plus_5pct_plus_drink": {
+        "time_shift": 60,
         "discount": 0.05,
-        "perk_value": 0.20,
+        "perk_value": 0.18,
     },
 
     "60min_plus_10pct_plus_dessert": {
         "time_shift": 60,
         "discount": 0.10,
-        "perk_value": 0.30,
+        "perk_value": 0.28,
     },
 
-    "90min_plus_15pct_plus_vip": {
-        "time_shift": 90,
+    "120min_plus_15pct_plus_vip": {
+        "time_shift": 120,
         "discount": 0.15,
-        "perk_value": 0.45,
+        "perk_value": 0.34,
+    },
+
+    "120min_plus_5pct_plus_drink": {
+        "time_shift": 120,
+        "discount": 0.05,
+        "perk_value": 0.18,
+    },
+
+    "180min_plus_10pct_plus_dessert": {
+        "time_shift": 180,
+        "discount": 0.10,
+        "perk_value": 0.28,
     },
 }
 
@@ -330,11 +410,11 @@ RESTAURANT_CONFIGS = {
         "tier": "budget",
         "allowed_options": [
             "discount_20pct",
-            "same_day_30min",
             "same_day_60min",
-            "30min_plus_5pct",
-            "45min_plus_10pct",
-            "30min_plus_drink",
+            "same_day_180min",
+            "60min_plus_5pct",
+            "180min_plus_15pct",
+            "free_drink",
             "60min_plus_10pct_plus_dessert",
         ]
     },
@@ -344,12 +424,12 @@ RESTAURANT_CONFIGS = {
         "tier": "budget",
         "allowed_options": [
             "discount_15pct",
-            "same_day_15min",
-            "same_day_45min",
-            "30min_plus_5pct_plus_drink",
-            "60min_plus_15pct",
-            "free_drink",
+            "same_day_60min",
+            "same_day_120min",
+            "60min_plus_5pct_plus_drink",
+            "120min_plus_10pct",
             "priority_future_booking",
+            "60min_plus_drink",
         ]
     },
 
@@ -358,12 +438,12 @@ RESTAURANT_CONFIGS = {
         "tier": "budget",
         "allowed_options": [
             "discount_20pct",
-            "same_day_30min",
-            "same_day_90min",
-            "45min_plus_10pct",
-            "90min_plus_20pct",
+            "same_day_120min",
+            "same_day_180min",
+            "180min_plus_20pct",
             "free_drink",
-            "60min_plus_dessert",
+            "120min_plus_dessert",
+            "next_day_plus_10pct",
         ]
     },
 
@@ -372,12 +452,12 @@ RESTAURANT_CONFIGS = {
         "tier": "budget",
         "allowed_options": [
             "discount_15pct",
-            "same_day_15min",
             "same_day_60min",
-            "30min_plus_5pct",
+            "same_day_180min",
             "60min_plus_15pct",
             "free_dessert",
-            "30min_plus_drink",
+            "60min_plus_drink",
+            "120min_plus_5pct_plus_drink",
         ]
     },
 
@@ -386,12 +466,12 @@ RESTAURANT_CONFIGS = {
         "tier": "budget",
         "allowed_options": [
             "discount_20pct",
-            "same_day_45min",
-            "same_day_90min",
-            "45min_plus_10pct",
-            "90min_plus_20pct",
-            "free_appetizer",
+            "same_day_120min",
+            "same_day_180min",
+            "180min_plus_15pct",
+            "vip_table_upgrade",
             "60min_plus_10pct_plus_dessert",
+            "next_day_plus_20pct",
         ]
     },
 
@@ -400,12 +480,12 @@ RESTAURANT_CONFIGS = {
         "tier": "midrange",
         "allowed_options": [
             "discount_10pct",
-            "same_day_15min",
-            "same_day_30min",
-            "30min_plus_5pct",
-            "60min_plus_dessert",
+            "same_day_60min",
+            "same_day_120min",
+            "60min_plus_5pct",
+            "120min_plus_dessert",
             "free_dessert",
-            "30min_plus_5pct_plus_drink",
+            "60min_plus_5pct_plus_drink",
         ]
     },
 
@@ -414,11 +494,11 @@ RESTAURANT_CONFIGS = {
         "tier": "midrange",
         "allowed_options": [
             "discount_10pct",
-            "same_day_30min",
             "same_day_60min",
-            "45min_plus_10pct",
-            "30min_plus_drink",
-            "free_appetizer",
+            "same_day_180min",
+            "120min_plus_10pct",
+            "60min_plus_drink",
+            "vip_table_upgrade",
             "60min_plus_10pct_plus_dessert",
         ]
     },
@@ -428,12 +508,12 @@ RESTAURANT_CONFIGS = {
         "tier": "midrange",
         "allowed_options": [
             "discount_15pct",
-            "same_day_15min",
-            "same_day_45min",
+            "same_day_60min",
+            "same_day_120min",
             "60min_plus_15pct",
             "free_dessert",
             "priority_future_booking",
-            "60min_plus_dessert",
+            "120min_plus_dessert",
         ]
     },
 
@@ -442,12 +522,12 @@ RESTAURANT_CONFIGS = {
         "tier": "midrange",
         "allowed_options": [
             "discount_10pct",
-            "same_day_30min",
-            "same_day_90min",
-            "30min_plus_5pct_plus_drink",
-            "45min_plus_10pct",
-            "free_appetizer",
-            "90min_plus_appetizer",
+            "same_day_120min",
+            "same_day_180min",
+            "60min_plus_5pct_plus_drink",
+            "120min_plus_10pct",
+            "vip_table_upgrade",
+            "180min_plus_10pct_plus_dessert",
         ]
     },
 
@@ -456,10 +536,9 @@ RESTAURANT_CONFIGS = {
         "tier": "midrange",
         "allowed_options": [
             "discount_15pct",
-            "same_day_15min",
             "same_day_60min",
-            "30min_plus_drink",
-            "60min_plus_dessert",
+            "same_day_180min",
+            "120min_plus_dessert",
             "free_dessert",
             "60min_plus_10pct_plus_dessert",
         ]
@@ -470,12 +549,11 @@ RESTAURANT_CONFIGS = {
         "tier": "premium",
         "allowed_options": [
             "discount_5pct",
-            "same_day_15min",
-            "same_day_30min",
-            "free_appetizer",
+            "same_day_60min",
+            "same_day_120min",
             "vip_table_upgrade",
-            "30min_plus_drink",
-            "90min_plus_15pct_plus_vip",
+            "next_day_plus_20pct",
+            "priority_future_booking",
         ]
     },
 
@@ -484,12 +562,11 @@ RESTAURANT_CONFIGS = {
         "tier": "premium",
         "allowed_options": [
             "discount_5pct",
-            "same_day_15min",
-            "same_day_45min",
+            "same_day_60min",
             "vip_table_upgrade",
             "priority_future_booking",
-            "60min_plus_dessert",
-            "next_day_plus_vip",
+            "120min_plus_dessert",
+            "next_day_plus_10pct",
         ]
     },
 
@@ -498,12 +575,11 @@ RESTAURANT_CONFIGS = {
         "tier": "premium",
         "allowed_options": [
             "discount_10pct",
-            "same_day_30min",
             "same_day_60min",
-            "free_appetizer",
+            "same_day_120min",
             "vip_table_upgrade",
-            "30min_plus_5pct_plus_drink",
-            "90min_plus_15pct_plus_vip",
+            "180min_plus_10pct_plus_dessert",
+            "next_day_plus_20pct",
         ]
     },
 
@@ -512,11 +588,10 @@ RESTAURANT_CONFIGS = {
         "tier": "premium",
         "allowed_options": [
             "discount_5pct",
-            "same_day_15min",
-            "same_day_90min",
+            "same_day_120min",
+            "same_day_180min",
             "free_dessert",
             "vip_table_upgrade",
-            "90min_plus_appetizer",
             "next_day_plus_vip",
         ]
     },
@@ -526,12 +601,11 @@ RESTAURANT_CONFIGS = {
         "tier": "premium",
         "allowed_options": [
             "discount_10pct",
-            "same_day_30min",
             "same_day_60min",
-            "free_appetizer",
             "priority_future_booking",
-            "60min_plus_dessert",
-            "90min_plus_15pct_plus_vip",
+            "120min_plus_dessert",
+            "180min_plus_10pct_plus_dessert",
+            "next_day_plus_20pct",
         ]
     },
 }
@@ -541,7 +615,7 @@ RESTAURANT_CONFIGS = {
 # RESTAURANTS
 # ============================================================
 
-def generate_restaurants(restaurant_tiers=None):
+def generate_restaurants(restaurant_tiers=None): #pokud none, vytvorime vsechny, pokud tier, vytvorime jen ty z tieru
 
     restaurants = []
 
@@ -551,17 +625,14 @@ def generate_restaurants(restaurant_tiers=None):
         else None
     )
 
-    if restaurant_tiers is None:
-        restaurant_items = [
-            (
-                restaurant_id,
-                RESTAURANT_CONFIGS[restaurant_id]
-            )
-            for restaurant_id in range(CONFIG["N_RESTAURANTS"])
-        ]
-    else:
-        restaurant_items = RESTAURANT_CONFIGS.items()
-
+    restaurant_items = [
+                (
+                    restaurant_id,
+                    RESTAURANT_CONFIGS[restaurant_id]
+                )
+                for restaurant_id in range(CONFIG["N_RESTAURANTS"])
+            ]
+    #restaurant item: [(0, {'allowed_options': ['xy', 'yx'], 'name' ...}), ..]
     for restaurant_id, config in restaurant_items:
 
         if (
@@ -589,7 +660,7 @@ def generate_restaurants(restaurant_tiers=None):
 
                 occupancy_ratio = base_occupancy
 
-                if hour in CONFIG["EVENING_PEAK_HOURS"]:
+                if hour in CONFIG["EVENING_PEAK_HOURS"]: #pokud jsem v peak hodine tak pricteme boost. zacali sme treba na 0.45 tzn +0.35
 
                     occupancy_ratio += (
                         CONFIG["EVENING_OCCUPANCY_BOOST"]
@@ -598,18 +669,18 @@ def generate_restaurants(restaurant_tiers=None):
                 if day in CONFIG["WEEKEND_DAYS"]:
 
                     occupancy_ratio += (
-                        CONFIG["WEEKEND_OCCUPANCY_BOOST"]
+                        CONFIG["WEEKEND_OCCUPANCY_BOOST"] #+0.25 (tzn sme v peaku o vikendu na 1.05
                     )
 
                 occupancy_ratio += np.random.normal(
                     0,
                     0.08
-                )
-
+                ) #pridame tam random bordel, treba -0.02550828040865042, -0.1 atp atp, nebo +0.1
+                # a my se treba v peaku dostaneme proste na 135 procent coz je bullshit, takze clip na max 100
                 occupancy_ratio = np.clip(
                     occupancy_ratio,
-                    0.05,
-                    0.98
+                    0.05, #todo: nebo 0??
+                    1.00
                 )
 
                 occupied = int(
@@ -650,7 +721,8 @@ def generate_customers(restaurants):
 
     for customer_id in range(CONFIG["N_CUSTOMERS"]):
 
-        restaurant = np.random.choice(restaurants)
+        restaurant = np.random.choice(restaurants) #jde do random restiky
+        #todo: ono ty premium mame vice obsazene, takze by mohlo byt ze do nich chodi vic lidi? ale spis to nechat takto
 
         customer = {
 
@@ -658,10 +730,10 @@ def generate_customers(restaurants):
 
             "restaurant": restaurant,
 
-            "restaurant_id": restaurant["restaurant_id"],
+            "restaurant_id": restaurant["restaurant_id"], #duplicitni info
 
             "requested_day":
-                np.random.randint(0, CONFIG["N_DAYS"]),
+                np.random.randint(0, CONFIG["N_DAYS"]), #todo: taky, tvrdime, ze vecer chodi lidi vic, ale pak chodi uplne random
 
             "requested_hour":
                 np.random.randint(
@@ -689,7 +761,7 @@ def generate_customers(restaurants):
                     1
                 ),
 
-            "restaurant_loyalty":
+            "restaurant_loyalty": #vzdy loajalni k ty kam jdou, toto mi prijde fer, nedavala bych to ze jsou loajalni ke konkretni
                 np.clip(
                     np.random.normal(
                         CONFIG["LOYALTY_MEAN"],
@@ -741,7 +813,7 @@ def has_capacity(restaurant, day, hour):
 
 
 def get_available_options(customer):
-
+    #takze to funguje tak, ze vlastne i kdyz je volno, tak jakoby neni, right?
     restaurant = customer["restaurant"]
 
     day = customer["requested_day"]
@@ -755,7 +827,9 @@ def get_available_options(customer):
 
         future_hour = (
             hour
-            + int(np.ceil(arm["time_shift"] / 60))
+            + int(np.ceil(arm["time_shift"] / 60)) #dobry, takze ty options +45 atp jsou ted ve smes uplna hovadina v tuhle cast
+            #protoze se to zaokrouhluje na cele hodiny
+
         )
 
         if future_hour >= restaurant["close_hour"]:

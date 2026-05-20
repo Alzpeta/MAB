@@ -36,7 +36,7 @@ SCENARIOS = {
 
 def configure_run():
 
-    run_name = "mab_run_occupancy_pressure"
+    run_name = "mab_run_init"
 
     config_overrides = {
 

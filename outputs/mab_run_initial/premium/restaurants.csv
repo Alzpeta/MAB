@@ -1,6 +1,0 @@
-restaurant_id,name,tier,allowed_options
-10,Pan Hranolka,premium,"discount_5pct, same_day_15min, same_day_30min, free_appetizer, vip_table_upgrade, 30min_plus_drink, 90min_plus_15pct_plus_vip"
-11,Grand Bryndza,premium,"discount_5pct, same_day_15min, same_day_45min, vip_table_upgrade, priority_future_booking, 60min_plus_dessert, next_day_plus_vip"
-12,Luxusny Gulas,premium,"discount_10pct, same_day_30min, same_day_60min, free_appetizer, vip_table_upgrade, 30min_plus_5pct_plus_drink, 90min_plus_15pct_plus_vip"
-13,Baron Parok,premium,"discount_5pct, same_day_15min, same_day_90min, free_dessert, vip_table_upgrade, 90min_plus_appetizer, next_day_plus_vip"
-14,Kralovsky Langoš,premium,"discount_10pct, same_day_30min, same_day_60min, free_appetizer, priority_future_booking, 60min_plus_dessert, 90min_plus_15pct_plus_vip"
