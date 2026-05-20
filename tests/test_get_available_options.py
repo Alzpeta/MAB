@@ -44,9 +44,9 @@ def make_customer(restaurant, requested_day=0, requested_hour=11):
 def test_get_available_options_returns_allowed_options_in_order():
     allowed_options = [
         "discount_5pct",
-        "same_day_15min",
         "same_day_60min",
-        "same_day_90min",
+        "same_day_120min",
+        "same_day_180min",
     ]
     restaurant = make_restaurant(allowed_options)
     customer = make_customer(restaurant, requested_hour=11)
@@ -58,9 +58,9 @@ def test_get_available_options_filters_full_capacity_and_closed_hours():
     restaurant = make_restaurant(
         [
             "discount_5pct",
-            "same_day_15min",
             "same_day_60min",
-            "same_day_90min",
+            "same_day_120min",
+            "same_day_180min",
             "next_day_plus_vip",
         ],
         full_slots={(0, 22)},

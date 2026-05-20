@@ -52,7 +52,7 @@ CONFIG = {
 
     "N_CUSTOMERS": 20000,
 
-    "N_RUNS": 100, # pocet behu pro kazdou strategii - pak se udela prumer
+    "N_RUNS": 1, # pocet behu pro kazdou strategii - pak se udela prumer
 
     "SEED": 33,
 
@@ -193,7 +193,7 @@ np.random.seed(CONFIG["SEED"])
 
 #menim timeshift na cele hours, protoze zbytek kodu je nastaveny na cele hours a nedava to dal smysl
 #samotny options muzou byt matematicky lepsi, ale nesmi byt akto ve stejne restauraci!!!!
-#TODO: vic matematicky stejnych options, jinak to proste je psycho sestavit + LLM to nezvladaji
+#TODO:checknout to
 ALL_OPTIONS = {
 
     # -------------------------
@@ -284,11 +284,15 @@ ALL_OPTIONS = {
         "discount": 0.00,
         "perk_value": 0.18,
     },
-
-    "free_dessert": {
+    "free_appetizer": {
         "time_shift": 0,
         "discount": 0.00,
         "perk_value": 0.28,
+        },
+    "free_dessert": {
+        "time_shift": 0,
+        "discount": 0.00,
+        "perk_value": 0.24,
     },
 
     "vip_table_upgrade": {
@@ -313,9 +317,9 @@ ALL_OPTIONS = {
         "perk_value": 0.00,
     },
 
-    "60min_plus_15pct": {
+    "60min_plus_10pct": {
         "time_shift": 60,
-        "discount": 0.15,
+        "discount": 0.10,
         "perk_value": 0.00,
     },
 
@@ -324,13 +328,16 @@ ALL_OPTIONS = {
         "discount": 0.10,
         "perk_value": 0.00,
     },
-
+    "120min_plus_15pct": {
+        "time_shift": 120,
+        "discount": 0.15,
+        "perk_value": 0.00,
+    },
     "180min_plus_15pct": {
         "time_shift": 180,
         "discount": 0.15,
         "perk_value": 0.00,
     },
-
     "180min_plus_20pct": {
         "time_shift": 180,
         "discount": 0.20,
@@ -346,14 +353,19 @@ ALL_OPTIONS = {
         "discount": 0.00,
         "perk_value": 0.18,
     },
+    "120min_plus_dessert": {
+        "time_shift": 60,
+        "discount": 0.00,
+        "perk_value": 0.24,
+    },
 
-    "60min_plus_vip": {
+    "120min_plus_vip": {
         "time_shift": 60,
         "discount": 0.00,
         "perk_value": 0.34,
     },
 
-    "120min_plus_dessert": {
+    "180min_plus_apetizer": {
         "time_shift": 120,
         "discount": 0.00,
         "perk_value": 0.28,
@@ -363,35 +375,89 @@ ALL_OPTIONS = {
     # MIXED TRADEOFFS
     # -------------------------
 
-    "60min_plus_5pct_plus_drink": {
+    "60min_plus_10pct_plus_drink": {
         "time_shift": 60,
-        "discount": 0.05,
+        "discount": 0.10,
         "perk_value": 0.18,
     },
 
-    "60min_plus_10pct_plus_dessert": {
+    "60min_plus_5pct_plus_dessert": {
         "time_shift": 60,
-        "discount": 0.10,
-        "perk_value": 0.28,
+        "discount": 0.05,
+        "perk_value": 0.24,
     },
 
-    "120min_plus_15pct_plus_vip": {
-        "time_shift": 120,
-        "discount": 0.15,
+    "180min_plus_10pct_plus_vip": {
+        "time_shift": 180,
+        "discount": 0.10,
         "perk_value": 0.34,
     },
 
-    "120min_plus_5pct_plus_drink": {
+    "120min_plus_10pct_plus_drink": {
         "time_shift": 120,
-        "discount": 0.05,
+        "discount": 0.10,
         "perk_value": 0.18,
     },
 
-    "180min_plus_10pct_plus_dessert": {
+    "180min_plus_05pct_plus_dessert": {
         "time_shift": 180,
-        "discount": 0.10,
-        "perk_value": 0.28,
+        "discount": 0.05,
+        "perk_value": 0.24,
     },
+
+    #nelinarni options
+    "60min_plus_20pct": { #mega vyhodne
+        "time_shift": 60,
+        "discount": 0.20,
+        "perk_value": 0.00,
+    },
+
+    "180min_plus_drink": {
+    "time_shift": 180,
+    "discount": 0.00,
+    "perk_value": 0.18,
+    },
+
+    "120min_plus_20pct": {
+    "time_shift": 120,
+    "discount": 0.20,
+    "perk_value": 0.00,
+    },
+
+    "next_day_plus_drink": {
+    "time_shift": 1440,
+    "discount": 0.00,
+    "perk_value": 0.18,
+},
+
+"60min_plus_15pct_plus_drink": {
+    "time_shift": 60,
+    "discount": 0.15,
+    "perk_value": 0.18,
+},
+
+"120min_plus_5pct_plus_vip": {
+    "time_shift": 120,
+    "discount": 0.05,
+    "perk_value": 0.34,
+},
+"120min_plus_5pct": {
+    "time_shift": 120,
+    "discount": 0.05,
+    "perk_value": 0.00,
+},
+
+"180min_plus_20pct_plus_drink": {
+    "time_shift": 180,
+    "discount": 0.20,
+    "perk_value": 0.18,
+},
+
+"next_day_plus_10pct_plus_drink": {
+    "time_shift": 1440,
+    "discount": 0.10,
+    "perk_value": 0.18,
+},
 }
 
 OPTION_NAMES = list(ALL_OPTIONS.keys())
@@ -403,32 +469,35 @@ N_ARMS = len(OPTION_NAMES)
 # RESTAURANTS
 # ============================================================
 
+#todo: checknout to + jestli tam jsou options co se nepouzily + jestli nejaka restaurace neni uplne stejna + mozna dat options kategorie a podle nich to tez hodnotit
 RESTAURANT_CONFIGS = {
 
     0: {
         "name": "Lacny Tanier",
         "tier": "budget",
+        # velmi hodna restaurace
         "allowed_options": [
             "discount_20pct",
-            "same_day_60min",
-            "same_day_180min",
-            "60min_plus_5pct",
-            "180min_plus_15pct",
+            "60min_plus_20pct",
+            "60min_plus_15pct_plus_drink",
+            "120min_plus_dessert",
             "free_drink",
-            "60min_plus_10pct_plus_dessert",
+            "same_day_60min",
+            "next_day_plus_10pct",
         ]
     },
 
     1: {
         "name": "U Hladneho Vlka",
         "tier": "budget",
+        # spis zla restaurace
         "allowed_options": [
-            "discount_15pct",
-            "same_day_60min",
             "same_day_120min",
-            "60min_plus_5pct_plus_drink",
-            "120min_plus_10pct",
+            "180min_plus_drink",
+            "next_day_same_time",
+            "discount_5pct",
             "priority_future_booking",
+            "180min_plus_05pct_plus_dessert",
             "60min_plus_drink",
         ]
     },
@@ -436,176 +505,195 @@ RESTAURANT_CONFIGS = {
     2: {
         "name": "Treska & Sen",
         "tier": "budget",
+        # normal balanced
         "allowed_options": [
-            "discount_20pct",
-            "same_day_120min",
-            "same_day_180min",
-            "180min_plus_20pct",
-            "free_drink",
-            "120min_plus_dessert",
+            "discount_15pct",
+            "priority_future_booking",
+            "60min_plus_10pct",
+            "120min_plus_10pct_plus_drink",
+            "free_dessert",
             "next_day_plus_10pct",
+            "60min_plus_drink",
         ]
     },
 
     3: {
         "name": "Kapustovy Dom",
         "tier": "budget",
+        # trochu hodna
         "allowed_options": [
-            "discount_15pct",
+            "discount_20pct",
             "same_day_60min",
-            "same_day_180min",
-            "60min_plus_15pct",
-            "free_dessert",
-            "60min_plus_drink",
-            "120min_plus_5pct_plus_drink",
+            "180min_plus_15pct",
+            "120min_plus_15pct",
+            "free_appetizer",
+            "next_day_plus_10pct_plus_drink",
+            "120min_plus_dessert",
         ]
     },
 
     4: {
         "name": "Rychla Bryndza",
         "tier": "budget",
+        # trochu zla
         "allowed_options": [
-            "discount_20pct",
-            "same_day_120min",
-            "same_day_180min",
+            "same_day_60min",
             "180min_plus_15pct",
-            "vip_table_upgrade",
-            "60min_plus_10pct_plus_dessert",
-            "next_day_plus_20pct",
+            "180min_plus_apetizer",
+            "discount_10pct",
+            "priority_future_booking",
+            "next_day_same_time",
+            "same_day_120min",
         ]
     },
 
     5: {
         "name": "Zlaty Rezen",
         "tier": "midrange",
+        # hodna
         "allowed_options": [
-            "discount_10pct",
-            "same_day_60min",
-            "same_day_120min",
-            "60min_plus_5pct",
-            "120min_plus_dessert",
+            "discount_15pct",
+            "180min_plus_20pct_plus_drink",
+            "120min_plus_10pct_plus_drink",
+            "120min_plus_vip",
             "free_dessert",
-            "60min_plus_5pct_plus_drink",
+            "same_day_60min",
+            "next_day_plus_vip",
         ]
     },
 
     6: {
         "name": "Knedla u Deda",
         "tier": "midrange",
+        # neutral
         "allowed_options": [
             "discount_10pct",
-            "same_day_60min",
             "same_day_180min",
-            "120min_plus_10pct",
+            "120min_plus_15pct",
             "60min_plus_drink",
             "vip_table_upgrade",
-            "60min_plus_10pct_plus_dessert",
+            "next_day_plus_vip",
+            "120min_plus_10pct_plus_drink",
         ]
     },
 
     7: {
         "name": "Pirohove Nebo",
         "tier": "midrange",
+        # zla
         "allowed_options": [
-            "discount_15pct",
             "same_day_60min",
-            "same_day_120min",
-            "60min_plus_15pct",
-            "free_dessert",
-            "priority_future_booking",
+            "180min_plus_drink",
+            "next_day_same_time",
+            "discount_5pct",
             "120min_plus_dessert",
+            "priority_future_booking",
+            "120min_plus_5pct",
         ]
     },
 
     8: {
         "name": "Haluska Palace",
         "tier": "midrange",
+        # premium wannabe
         "allowed_options": [
             "discount_10pct",
-            "same_day_120min",
-            "same_day_180min",
-            "60min_plus_5pct_plus_drink",
-            "120min_plus_10pct",
+            "60min_plus_10pct_plus_drink",
+            "120min_plus_5pct_plus_vip",
             "vip_table_upgrade",
-            "180min_plus_10pct_plus_dessert",
+            "same_day_180min",
+            "next_day_plus_vip",
+            "free_appetizer",
         ]
     },
 
     9: {
         "name": "Mastny Obrus",
         "tier": "midrange",
+         # chaotic balanced
         "allowed_options": [
             "discount_15pct",
             "same_day_60min",
-            "same_day_180min",
+            "180min_plus_20pct",
+            "free_appetizer",
+            "120min_plus_10pct_plus_drink",
+            "next_day_plus_10pct",
             "120min_plus_dessert",
-            "free_dessert",
-            "60min_plus_10pct_plus_dessert",
         ]
     },
 
     10: {
         "name": "Pan Hranolka",
         "tier": "premium",
+         # arrogant premium
         "allowed_options": [
             "discount_5pct",
             "same_day_60min",
-            "same_day_120min",
-            "vip_table_upgrade",
-            "next_day_plus_20pct",
             "priority_future_booking",
+            "vip_table_upgrade",
+            "next_day_same_time",
+            "180min_plus_drink",
+            "120min_plus_dessert",
         ]
     },
 
     11: {
         "name": "Grand Bryndza",
         "tier": "premium",
+        # hodna premium
         "allowed_options": [
-            "discount_5pct",
-            "same_day_60min",
+            "discount_10pct",
+            "60min_plus_15pct_plus_drink",
+            "120min_plus_vip",
             "vip_table_upgrade",
-            "priority_future_booking",
-            "120min_plus_dessert",
-            "next_day_plus_10pct",
+            "same_day_180min",
+            "next_day_plus_vip",
+            "120min_plus_10pct",
         ]
     },
 
     12: {
         "name": "Luxusny Gulas",
         "tier": "premium",
+        # balanced premium
         "allowed_options": [
             "discount_10pct",
-            "same_day_60min",
             "same_day_120min",
-            "vip_table_upgrade",
-            "180min_plus_10pct_plus_dessert",
-            "next_day_plus_20pct",
+            "priority_future_booking",
+            "180min_plus_10pct_plus_vip",
+            "free_appetizer",
+            "next_day_plus_10pct",
+            "60min_plus_10pct",
         ]
     },
 
     13: {
         "name": "Baron Parok",
         "tier": "premium",
+        # evil luxury place
         "allowed_options": [
-            "discount_5pct",
             "same_day_120min",
-            "same_day_180min",
-            "free_dessert",
+            "next_day_same_time",
+            "discount_5pct",
+            "priority_future_booking",
+            "180min_plus_05pct_plus_dessert",
             "vip_table_upgrade",
-            "next_day_plus_vip",
+            "180min_plus_drink",
         ]
     },
 
     14: {
         "name": "Kralovsky Langoš",
         "tier": "premium",
+        # overcompensating fancy place
         "allowed_options": [
-            "discount_10pct",
-            "same_day_60min",
-            "priority_future_booking",
-            "120min_plus_dessert",
-            "180min_plus_10pct_plus_dessert",
+            "discount_15pct",
+            "60min_plus_20pct",
+            "120min_plus_20pct",
+            "120min_plus_5pct_plus_vip",
+            "vip_table_upgrade",
             "next_day_plus_20pct",
+            "60min_plus_15pct_plus_drink",
         ]
     },
 }
@@ -820,7 +908,7 @@ def get_available_options(customer):
     hour = customer["requested_hour"]
 
     available = []
-
+    #todo - udelat kalendar loop aby to vyresilo kdyz nekdo prijde v nedeli tak abychom nepretekli
     for option in restaurant["allowed_options"]:
 
         arm = ALL_OPTIONS[option]
@@ -831,14 +919,15 @@ def get_available_options(customer):
             #protoze se to zaokrouhluje na cele hodiny
 
         )
-
+        #todo: co se stane, kdyz neni mozne mit dost available options?
+        #coz se dost jasne stat muze zejo, kdyz jich nabizim 5 ale jen 3 muzu nabidnout
         if future_hour >= restaurant["close_hour"]:
             continue
 
         if future_hour < restaurant["open_hour"]:
             continue
 
-        if future_hour < 24:
+        if future_hour < 24: #todo bug
 
             if not has_capacity(
                 restaurant,
