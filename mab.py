@@ -881,9 +881,14 @@ def generate_customers(restaurants):
                     0,
                     1
                 ),
-
-            "group_size":
-                np.random.randint(1, 7)
+            #do ted se nebralo v potaz pri reseni, jestli je plno
+            #to ze jde skupina dvou lidi neni stejne pravdepodobne jako 7 imo
+            "group_size": np.random.choice(
+                [1, 2, 3, 4, 5, 6, 7],
+                p=[0.15, 0.35, 0.2, 0.12, 0.1, 0.05, 0.03]
+            )
+            # "group_size":
+            #     np.random.randint(1, 7)
         }
 
         customers.append(customer)
@@ -895,11 +900,11 @@ def generate_customers(restaurants):
 # AVAILABILITY
 # ============================================================
 
-def has_capacity(restaurant, day, hour):
+def has_capacity(restaurant, day, hour, group_size):
 
     return (
-        restaurant["calendar"][day][hour]
-        < CONFIG["SLOTS_PER_HOUR"]
+        restaurant["calendar"][day][hour] + group_size #kolik tam je plus kolik jich jde musi byt mensi rovno kapacite
+        <= CONFIG["SLOTS_PER_HOUR"]
     )
 
 
@@ -909,6 +914,7 @@ def get_available_options(customer):
 
     day = customer["requested_day"]
     hour = customer["requested_hour"]
+    group_size = customer["group_size"]
 
     available = []
     #todo - udelat kalendar loop aby to vyresilo kdyz nekdo prijde v nedeli tak abychom nepretekli
@@ -925,7 +931,8 @@ def get_available_options(customer):
             if not has_capacity(
                     restaurant,
                     day + 1,
-                    hour
+                    hour,
+                    group_size
                 ):
                     continue
         else:
@@ -938,7 +945,8 @@ def get_available_options(customer):
             elif not has_capacity(
                 restaurant,
                 day,
-                future_hour
+                future_hour,
+                group_size
             ):
                 continue
 
