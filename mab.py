@@ -730,7 +730,7 @@ def generate_restaurants(restaurant_tiers=None): #pokud none, vytvorime vsechny,
             continue
 
         #todo: ted je problem, ze mame jen 7 dnu a osoba muze prijit o 24 hodin pozdeji a checkujeme zda je misto - ten den neexistuje
-        #fix: udelam to tak, ze den 0 je tam 2x - tzn opakuju ten stejny tyden, dalsi pondeli je to stejne co to predchozi
+        #fixed: udelam to tak, ze den 0 je tam 2x - tzn opakuju ten stejny tyden, dalsi pondeli je to stejne co to predchozi
         #todo: jsme s tim takto v poho?
         calendar = {}
 
@@ -1056,20 +1056,21 @@ class ReservationEnvironment:
     def __init__(self, customers):
 
         self.customers = customers
-        self.t = 0
+        self.t = 0 #time step
 
     def reset(self):
-        self.t = 0
+        self.t = 0 #reset pred kazdym novym runem
 
     def get_customer(self):
-        return self.customers[self.t]
+        return self.customers[self.t] #kazdy customer je jeden step
 
     def customer_choice(self, displayed_arm_indices):
 
         customer = self.get_customer()
-
-        if len(displayed_arm_indices) == 0:
-            return None, 0
+        #tady sme ve fazi ze teda prisli option
+        if len(displayed_arm_indices) == 0: #hm co se realne teda stane kdyz nezobrazim nic nebo malo??
+            return None, 0 #todo: takze vlastne banditovi rikame ze to nezvladl? je to cajk?
+            #todo: neni lepsi skip??
 
         for arm_index in displayed_arm_indices:
 
@@ -1079,10 +1080,10 @@ class ReservationEnvironment:
                 customer,
                 option_name
             )
-
+            #hodim si kostkou a jestli je to min nez p accept tak to prijal
             accepted = np.random.rand() < p_accept
 
-            if accepted:
+            if accepted: #prvni co vezmu
                 return arm_index, 1
 
         return None, 0
@@ -1112,15 +1113,16 @@ class BaseAgent:
 
     def __init__(self, n_arms):
 
-        self.counts = np.zeros(n_arms)
-
-        self.values = (
+        self.counts = np.zeros(n_arms) #kolkrat byl dany arm vybrany, pokud 3 army, tak pole 3 0
+        #mysleno, kolikrat ot ten agent navrhnul??
+        self.values = ( #odhad prumerneho rewardu armu
             np.ones(n_arms)
             * CONFIG["INITIAL_ACCEPTANCE_ESTIMATE"]
-        )
+        ) #jak dobry si myslim ze arm je
+        #initial je proste to jak to mame nastavene array([0.15, 0.15, 0.15])
 
     def update(self, arm, reward):
-
+        #todo: projit
         self.counts[arm] += 1
 
         n = self.counts[arm]
@@ -1137,12 +1139,13 @@ class BaseAgent:
 class RandomAgent(BaseAgent):
 
     def select_arms(self, available_indices, k):
-
+        #k je kolik toho muzu vybrat, tzn random z toho vyberu vezmu k
         return np.random.choice(
             available_indices,
-            size=min(k, len(available_indices)),
-            replace=False
-        )
+            size=min(k, len(available_indices)), #pokud min options nez muzu, tak vezmu tolik kolik toho je
+            #kdyz 0 tak 0 - ono se to nestane nikdy ze by tam slo 0 realne, protoze kazda restaurace ma nejakou option co neni casove zavisla..
+            replace=False #bez opakova, tzn nemuzu dvakrat selectnout stejny arm, tak se to historicky jmenuje proste, ze nevracim kulicku zpet do pytlicku na los..
+        ) #todo: ale stejne, discuss
 
 
 # ============================================================
@@ -1155,38 +1158,38 @@ class EpsilonGreedyAgent(BaseAgent):
 
         super().__init__(n_arms)
 
-        self.epsilon = epsilon
-
+        self.epsilon = epsilon #epsilon == pravdepodobnost explorace
+        #toto mimo testy realne nemenime, je to klasicky zvoleny cislo
     def select_arms(self, available_indices, k):
 
-        if np.random.rand() < self.epsilon:
-
+        if np.random.rand() < self.epsilon: #klasika, hazu kostkou od 0 do 1, pokud min jak 0,1, jdu explorovat
+            #pak jdu uplne random
             return np.random.choice(
                 available_indices,
                 size=min(k, len(available_indices)),
                 replace=False
             )
-
+        #mne chodi indexy tech options a to odpovida indexu tech values.
         available_scores = self.values[available_indices]
 
         best_local = np.argsort(
             available_scores
-        )[-k:]
+        )[-k:] #vezmu k nejvetsich values
 
-        return available_indices[best_local][::-1]
+        return available_indices[best_local][::-1] #zas skutecne indexy tech arms
 
 
 # ============================================================
 # DECAY EPSILON
 # ============================================================
-
+#na zacatku hodne explorujeme a pak vic exploitujeme kdyz uz mame data
 class DecayEpsilonAgent(BaseAgent):
 
     def __init__(
         self,
         n_arms,
-        epsilon_0=1.0,
-        min_epsilon=0.01
+        epsilon_0=1.0, #zaciname se stejnym epsilon, ale to postupne klesa
+        min_epsilon=0.01 #az sem
     ):
 
         super().__init__(n_arms)
@@ -1194,25 +1197,26 @@ class DecayEpsilonAgent(BaseAgent):
         self.epsilon_0 = epsilon_0
         self.min_epsilon = min_epsilon
 
-        self.t = 1
+        self.t = 1 #dela se to epsilon_0 / sqrt(t), pro 10 000 uz je to tech 0.01 takze pak jedeme na min
+        #pro 1.0 je t =1
 
     def select_arms(self, available_indices, k):
 
-        epsilon = max(
+        epsilon = max( #bud beru to prepocitane epsilon, nebo minimum
             self.min_epsilon,
             self.epsilon_0 / np.sqrt(self.t)
         )
 
-        self.t += 1
+        self.t += 1 #tady musim kvuli tomu jet vlastni t
 
-        if np.random.rand() < epsilon:
+        if np.random.rand() < epsilon: #the same
 
             return np.random.choice(
                 available_indices,
                 size=min(k, len(available_indices)),
                 replace=False
             )
-
+        #the sameeee - kdyby bylo potreba to menit, nejak to slit, ale jinak asi ok ze to neni uplne krasny kod
         available_scores = self.values[available_indices]
 
         best_local = np.argsort(
@@ -1225,22 +1229,24 @@ class DecayEpsilonAgent(BaseAgent):
 # ============================================================
 # UCB1
 # ============================================================
-
+#upper confidence bound - chci vybirat co ma vysokou prumernou hodnotu ale cas od casu zkusit explore
 class UCB1Agent(BaseAgent):
 
     def __init__(self, n_arms, c=1):
 
         super().__init__(n_arms)
 
-        self.c = c
+        self.c = c #to je proste cast vzorecku
 
-        self.t = 1
+        self.t = 1 #to je taky vec co potrebujeme ve vzorecku
+        #todo, ty stretegie co jedou na t tak zalezi kolik mam customers, takze? zkusit to pak zvednout
+        #technicky ale je realisticky ze rezervobot tolik lidi nebude pouzivat, nic ve zlem
 
     def select_arms(self, available_indices, k):
 
         available_indices = np.array(available_indices)
 
-        unexplored = np.array([
+        unexplored = np.array([ #najde army co jeste nezkusil, tzn maji 0
             arm for arm in available_indices
             if self.counts[arm] == 0
         ])
@@ -1249,25 +1255,25 @@ class UCB1Agent(BaseAgent):
 
         if len(unexplored) > 0:
 
-            chosen.extend(
+            chosen.extend( #kdyz jeste nezkusil vic jak k tak vezme proste tyto a konci
                 list(unexplored[:k])
             )
 
-        remaining_needed = k - len(chosen)
+        remaining_needed = k - len(chosen) #kolik zbyva zejo aby se to veslo do k
 
         if remaining_needed > 0:
 
-            remaining = np.array([
+            remaining = np.array([ #proste ten zbytek co jeste neni v chosen - jejich indexy
                 arm for arm in available_indices
                 if arm not in chosen
             ])
 
             if len(remaining) > 0:
 
-                ucb_scores = self.values.copy()
+                ucb_scores = self.values.copy() #potrebuju vzit ty prumerne rewardy, ale nechci modifikvoat to co je ulozeno
 
-                explored = self.counts > 0
-
+                explored = self.counts > 0 #hodi true pro ty co uz byly explored a false pro ty co ne
+                #ok tohle jakoby udela masku
                 ucb_scores[explored] += (
                     self.c
                     * np.sqrt(
