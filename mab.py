@@ -971,63 +971,75 @@ def compute_acceptance_probability(customer, option_name):
 
     arm = ALL_OPTIONS[option_name]
 
+    #time shift ma uplne jiny scale nez zbytek utilit, musi to byt od 0 do 1 jako zbytek, jinak to bude strasne bias
+    #jinak by to proste vzdy bylo 0
+    #todo: normalizovat nejak trochu jinak? za me takto cajk
     normalized_shift = (
         arm["time_shift"]
         / CONFIG["TIME_SHIFT_NORMALIZER"]
     )
 
-    utility = CONFIG["BASE_UTILITY"]
+    utility = CONFIG["BASE_UTILITY"] #vychozi ochota zakaznika to prijmout,
 
+    #kdyz je tam discount tak se jeho nastaveni zvedne
+    #tady muzeme jit jen do plusu
     utility += (
         customer["discount_affinity"]
         * arm["discount"]
         * CONFIG["DISCOUNT_WEIGHT"]
     )
 
+    #flexibilita - jak moc zakaznikovi vadi posunuti rezervace
+    #0 == vubec neni flexibilni, 1 = je mu to dost jedno
     utility += (
-        (1 - customer["time_flexibility"])
+        (1 - customer["time_flexibility"]) #kdyz je mu to jedno, nic se neodecte
         * (-normalized_shift)
         * CONFIG["TIME_SHIFT_WEIGHT"]
     )
+    #jako moc to popravde neodecita, ale zas je tam pak jeste ta urgence tak..
 
+    #flexibility == personality trait, urgency == situation state
+    #todo: lehce redundatni, za me ok
+    #urgency 0 - je uplne v chillu a je mu to jedno urgency 1 - je to nejdulezitejsi akce jeho zivota
     utility += (
         customer["urgency"]
         * (-normalized_shift)
         * CONFIG["URGENCY_DELAY_WEIGHT"]
     )
-
+    #jak moc se necha oblbnout vecma zadarmo atp, 0 vubec, 1 mega moc, ciste pozitivni vstup
     utility += (
         customer["perk_affinity"]
         * arm["perk_value"]
         * CONFIG["PERK_WEIGHT"]
     )
-
+    #jak moc ma loajalitu k te restice
     utility += (
         customer["restaurant_loyalty"]
         * CONFIG["LOYALTY_WEIGHT"]
     )
 
-    if customer["requested_hour"] >= 19:
+    if customer["requested_hour"] >= 19: #vecer je min flexibilni
 
         utility -= (
             normalized_shift
             * CONFIG["EVENING_DELAY_PENALTY"]
         )
 
-    if customer["group_size"] >= 5:
+    if customer["group_size"] >= 5: #vic lidi to bude vic iritovat ze se to posouva
 
         utility -= (
             normalized_shift
             * CONFIG["GROUP_DELAY_PENALTY"]
         )
-
-    utility += np.random.normal(
+    #random cislo okolo 0, jak plus tak i minus
+    utility += np.random.normal( #a nejaky random noise do toho vseho
         0,
         CONFIG["NOISE_STD"]
     )
 
-    probability = 1 / (1 + np.exp(-utility))
-
+    probability = 1 / (1 + np.exp(-utility)) #sigmoid funkce proste - prevedu na pravdepodobnost
+    #todo, dava to nejak v pohode acceptance?
+    #zase boj proti determinismu: (i uplne debilni nabidka ted muze cas od casu projit, neb takovy je zivot
     return np.clip(
         probability,
         CONFIG["MIN_ACCEPTANCE_PROBABILITY"],
