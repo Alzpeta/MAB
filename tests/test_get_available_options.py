@@ -47,6 +47,7 @@ def test_get_available_options_returns_allowed_options_in_order():
         "same_day_60min",
         "same_day_120min",
         "same_day_180min",
+        "next_day_plus_vip",
     ]
     restaurant = make_restaurant(allowed_options)
     customer = make_customer(restaurant, requested_hour=11)
@@ -67,4 +68,4 @@ def test_get_available_options_filters_full_capacity_and_closed_hours():
     )
     customer = make_customer(restaurant, requested_day=0, requested_hour=21)
 
-    assert mab.get_available_options(customer) == ["discount_5pct"]
+    assert mab.get_available_options(customer) == ["discount_5pct", "next_day_plus_vip"]

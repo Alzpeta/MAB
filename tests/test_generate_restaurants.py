@@ -71,6 +71,7 @@ def test_generate_all_restaurants_with_expected_structure():
         assert restaurant["allowed_options"] == config["allowed_options"]
         assert restaurant["open_hour"] == mab.CONFIG["OPEN_HOUR"]
         assert restaurant["close_hour"] == mab.CONFIG["CLOSE_HOUR"]
+        restaurant["calendar"].pop(7) #fake day removed
         assert set(restaurant["calendar"].keys()) == set(
             range(mab.CONFIG["N_DAYS"])
         )

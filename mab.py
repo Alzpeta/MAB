@@ -729,6 +729,9 @@ def generate_restaurants(restaurant_tiers=None): #pokud none, vytvorime vsechny,
         ):
             continue
 
+        #todo: ted je problem, ze mame jen 7 dnu a osoba muze prijit o 24 hodin pozdeji a checkujeme zda je misto - ten den neexistuje
+        #fix: udelam to tak, ze den 0 je tam 2x - tzn opakuju ten stejny tyden, dalsi pondeli je to stejne co to predchozi
+        #todo: jsme s tim takto v poho?
         calendar = {}
 
         tier = config["tier"]
@@ -777,7 +780,7 @@ def generate_restaurants(restaurant_tiers=None): #pokud none, vytvorime vsechny,
                 )
 
                 calendar[day][hour] = occupied
-
+        calendar[7] = calendar[0] #fix: osoba v nedeli uz muze dostat termin na dalsi den
         restaurants.append({
 
             "restaurant_id": restaurant_id,
@@ -912,24 +915,27 @@ def get_available_options(customer):
     for option in restaurant["allowed_options"]:
 
         arm = ALL_OPTIONS[option]
+        time_shift = int(np.ceil(arm["time_shift"] / 60))
 
-        future_hour = (
-            hour
-            + int(np.ceil(arm["time_shift"] / 60)) #dobry, takze ty options +45 atp jsou ted ve smes uplna hovadina v tuhle cast
-            #protoze se to zaokrouhluje na cele hodiny
-
-        )
-        #todo: co se stane, kdyz neni mozne mit dost available options?
-        #coz se dost jasne stat muze zejo, kdyz jich nabizim 5 ale jen 3 muzu nabidnout
-        if future_hour >= restaurant["close_hour"]:
-            continue
-
-        if future_hour < restaurant["open_hour"]:
-            continue
-
-        if future_hour < 24: #todo bug
-
+        #dobry, takze ty options +45 atp jsou ted ve smes uplna hovadina v tuhle cast
+        #protoze se to zaokrouhluje na cele hodiny
+        # todo: co se stane, kdyz neni mozne mit dost available options?
+        # coz se dost jasne stat muze zejo, kdyz jich nabizim 5 ale jen 3 muzu nabidnout
+        if time_shift == 24: #ta osoba musi rezervovat oteviraci dobu tzn pristi den bude urco bezpecne v oteviraci dobe
             if not has_capacity(
+                    restaurant,
+                    day + 1,
+                    hour
+                ):
+                    continue
+        else:
+
+            future_hour = hour + time_shift
+
+            if future_hour >= restaurant["close_hour"]:
+                continue
+
+            elif not has_capacity(
                 restaurant,
                 day,
                 future_hour
