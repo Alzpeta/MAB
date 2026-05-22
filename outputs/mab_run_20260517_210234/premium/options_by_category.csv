@@ -1,7 +1,0 @@
-scenario,option_category,shown_count,accepted_count,acceptance_rate
-premium,discount_only,1863832.0,252461.0,0.13545265882332744
-premium,perk_only,5693942.0,808143.0,0.14193031822241955
-premium,time_discount,0.0,0.0,
-premium,time_discount_perk,2240319.0,361044.0,0.1611574066014706
-premium,time_only,2427883.0,283287.0,0.11668066377168916
-premium,time_perk,2174024.0,283946.0,0.13060849374247938

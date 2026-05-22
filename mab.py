@@ -52,7 +52,7 @@ CONFIG = {
 
     "N_CUSTOMERS": 20000,
 
-    "N_RUNS": 1, # pocet behu pro kazdou strategii - pak se udela prumer
+    "N_RUNS": 30, # pocet behu pro kazdou strategii - pak se udela prumer
 
     "SEED": 33,
 
@@ -1121,7 +1121,7 @@ class BaseAgent:
         ) #jak dobry si myslim ze arm je
         #initial je proste to jak to mame nastavene array([0.15, 0.15, 0.15])
 
-    def update(self, arm, reward):
+    def update(self, arm, reward): #ok sem se dostanu pokud to acceptne customer
         #todo: projit
         self.counts[arm] += 1
 
@@ -1129,9 +1129,11 @@ class BaseAgent:
 
         self.values[arm] += (
             reward - self.values[arm]
-        ) / n
-
-
+        ) / n #prepocitam tu value, coz btw po 1 acceptu je ted od 0.15 na 0.85, to je dost ne?
+        #early lucky/unlucky samples maji obri vliv
+        #proto ted thompson dominuje, protoze ten toto tolik neresi, ale chudak ubt je v prcici
+        #TODO: zkusit toto pozmenit no
+        #menila bych to ale pres ten acceptance rate co je primo v cfg
 # ============================================================
 # RANDOM
 # ============================================================
@@ -1232,6 +1234,10 @@ class DecayEpsilonAgent(BaseAgent):
 #upper confidence bound - chci vybirat co ma vysokou prumernou hodnotu ale cas od casu zkusit explore
 class UCB1Agent(BaseAgent):
 
+    #ucb pro arm je = prumerny reward armu + c krat sqrt logt / na
+    #na je kolikrat byl arm vyzkousen
+    #to jede pro vsechny ty arms
+    #tzn vezme prumer co uz vim a pricte k tomu tzv exploracni bonus
     def __init__(self, n_arms, c=1):
 
         super().__init__(n_arms)
@@ -1245,7 +1251,7 @@ class UCB1Agent(BaseAgent):
     def select_arms(self, available_indices, k):
 
         available_indices = np.array(available_indices)
-
+        #on musi kazdy arm alespon jednou videt, jina bych delila nulou - na by byl 0
         unexplored = np.array([ #najde army co jeste nezkusil, tzn maji 0
             arm for arm in available_indices
             if self.counts[arm] == 0
@@ -1274,25 +1280,32 @@ class UCB1Agent(BaseAgent):
 
                 explored = self.counts > 0 #hodi true pro ty co uz byly explored a false pro ty co ne
                 #ok tohle jakoby udela masku
+                #jde o to abych nedelila nulou tzn ignoruju ty neexplored, sem se stejne nedostanou zadny co uz nemam ve vyberu logicky
                 ucb_scores[explored] += (
                     self.c
                     * np.sqrt(
                         np.log(max(self.t, 2))
                         / self.counts[explored]
                     )
-                )
+                ) #tohle je strasne nepochopitelne napsany
+                #pointa je spocitat teda to pro vsechny jen pro ty neprozkoumane bez toho sqrt bla bla
 
                 remaining_scores = ucb_scores[remaining]
-
+                #a vezmu ty nejvyssi do poctu
+                #ale jen z tech ze kterych mam jeste vybirat, ty vybrany uz sou vybrany zejo
                 best_local = np.argsort(
                     remaining_scores
                 )[-remaining_needed:]
-
+                #todo je to tu naopak!!
+                # chosen.extend(
+                #     list(remaining[best_local])
+                # )
+                #mein gott to je peklo
                 chosen.extend(
-                    list(remaining[best_local])
+                    list(remaining[best_local][::-1])
                 )
 
-        self.t += 1
+        self.t += 1 #todo: jak je to s tim teckem v base, nedela se to teda 2x? radsi checknout
 
         return np.array(chosen)
 
@@ -1300,30 +1313,33 @@ class UCB1Agent(BaseAgent):
 # ============================================================
 # THOMPSON SAMPLING
 # ============================================================
-
+#ok takze mam beta rozdeleni, co se sklada z alfa - pocet uspechu a beta - pocet neuspechu
 class ThompsonSamplingAgent:
 
     def __init__(self, n_arms):
 
-        self.alpha = np.ones(n_arms)
+        self.alpha = np.ones(n_arms) #na zacatku hodim same 1
 
-        self.beta = np.ones(n_arms)
+        self.beta = np.ones(n_arms) # a tady taky. tzn kazdy arm zacina s 1,1
 
     def select_arms(self, available_indices, k):
 
         samples = np.random.beta(
             self.alpha,
             self.beta
-        )
+        ) #pro kazdy arm nahodne vygeneruju skore z jeho beta distribuce
+        #tzn skoncim s tim ze mam treba pro 5 options 5 cisel
 
-        available_scores = samples[available_indices]
+        available_scores = samples[available_indices] #pocitala sem to pro vsechny options, takze ted vezmu fakt jen ty co mam na vyber
 
         best_local = np.argsort(
             available_scores
         )[-k:]
 
-        return available_indices[best_local][::-1]
+        return available_indices[best_local][::-1] #snad cajk? neupravovala sem to
 
+    #ok tady to prepisuje ten update z basu co sem se k nemu jeste nedostala skrz kod
+    #todo: dostat se k tomuto skrz pusteni scenare
     def update(self, arm, reward):
 
         self.alpha[arm] += reward
@@ -1346,24 +1362,24 @@ class SoftmaxAgent(BaseAgent):
     def select_arms(self, available_indices, k):
 
         available_scores = self.values[available_indices]
-
+        #vezmuu skore jen pro ty, ktere mam na vyber
         stable_scores = (
             available_scores
             - available_scores.max()
-        )
-
+        )#todo: jak si pamatuju v tehlech pripadech teda to ze ty indexy uz nemaji vsechna cisla atp???
+        #od kazdeho odectu nejvyssi skore - tzn nejvyssi ma ted 0, zbytek v minusu
         exp_scores = np.exp(
             stable_scores / self.temperature
-        )
+        ) #to co melo 0 ma 1.
 
-        probs = exp_scores / exp_scores.sum()
+        probs = exp_scores / exp_scores.sum() #prepocitam na pravdepodobnosti
 
-        return np.random.choice(
+        return np.random.choice( # a pak podle tech probls hazu kostkou
             available_indices,
             size=min(k, len(available_indices)),
             replace=False,
             p=probs
-        )
+        ) #toto za me ok
 
 
 # ============================================================
@@ -1450,143 +1466,143 @@ def run_experiment(agent_class, k, restaurant_tiers=None):
 # RUN EXPERIMENTS
 # ============================================================
 
-def main():
-
-    all_results = []
-
-    for k in CONFIG["N_SHOWN_OPTIONS_LIST"]:
-
-        print("\n" + "=" * 60)
-        print(f"TOP-K = {k}")
-        print("=" * 60)
-
-        topk_rows = []
-
-        for agent_name, agent_class in AGENTS.items():
-
-            run_rewards = []
-
-            for run in range(CONFIG["N_RUNS"]):
-
-                mean_reward = run_experiment(
-                    agent_class,
-                    k
-                )
-
-                run_rewards.append(mean_reward)
-
-            mean_reward = np.mean(run_rewards)
-
-            std_reward = np.std(run_rewards)
-
-            ci95 = (
-                1.96
-                * std_reward
-                / np.sqrt(CONFIG["N_RUNS"])
-            )
-
-            row = {
-
-                "agent": agent_name,
-
-                "top_k": k,
-
-                "mean_reward": mean_reward,
-
-                "std_reward": std_reward,
-
-                "ci95": ci95,
-
-                "min_reward": np.min(run_rewards),
-
-                "max_reward": np.max(run_rewards),
-            }
-
-            topk_rows.append(row)
-
-        random_reward = next(
-            row["mean_reward"]
-            for row in topk_rows
-            if row["agent"] == "Random"
-        )
-
-        for row in topk_rows:
-
-            improvement = (
-                (
-                    row["mean_reward"]
-                    - random_reward
-                )
-                / random_reward
-            ) * 100
-
-            row["improvement_vs_random_pct"] = improvement
-
-        topk_rows = sorted(
-            topk_rows,
-            key=lambda x: x["mean_reward"],
-            reverse=True
-        )
-
-        for rank, row in enumerate(topk_rows, start=1):
-
-            row["rank"] = rank
-
-            all_results.append(row)
-
-            print(
-                f"{rank}. "
-                f"{row['agent']:<20}"
-                f"reward={row['mean_reward']:.4f} | "
-                f"std={row['std_reward']:.4f} | "
-                f"CI95=±{row['ci95']:.4f} | "
-                f"improvement={row['improvement_vs_random_pct']:+.2f}%"
-            )
-
-    results_df = pd.DataFrame(all_results)
-
-    results_df = results_df[[
-        "top_k",
-        "rank",
-        "agent",
-        "mean_reward",
-        "std_reward",
-        "ci95",
-        "min_reward",
-        "max_reward",
-        "improvement_vs_random_pct"
-    ]]
-
-    print("\nFINAL RESULTS:")
-    print(results_df.to_string(index=False))
-
-
-    # ============================================================
-    # PLOT
-    # ============================================================
-
-    plt.figure(figsize=(10, 6))
-
-    for agent_name in results_df["agent"].unique():
-
-        subset = results_df[
-            results_df["agent"] == agent_name
-        ]
-
-        plt.plot(
-            subset["top_k"],
-            subset["mean_reward"],
-            marker="o",
-            label=agent_name
-        )
-
-    plt.xlabel("Number of shown alternatives (TOP-K)")
-    plt.ylabel("Mean acceptance reward")
-    plt.title("Bandit Strategy Comparison")
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-
-if __name__ == "__main__":
-    main()
+# def main():
+#
+#     all_results = []
+#
+#     for k in CONFIG["N_SHOWN_OPTIONS_LIST"]:
+#
+#         print("\n" + "=" * 60)
+#         print(f"TOP-K = {k}")
+#         print("=" * 60)
+#
+#         topk_rows = []
+#
+#         for agent_name, agent_class in AGENTS.items():
+#
+#             run_rewards = []
+#
+#             for run in range(CONFIG["N_RUNS"]):
+#
+#                 mean_reward = run_experiment(
+#                     agent_class,
+#                     k
+#                 )
+#
+#                 run_rewards.append(mean_reward)
+#
+#             mean_reward = np.mean(run_rewards)
+#
+#             std_reward = np.std(run_rewards)
+#
+#             ci95 = (
+#                 1.96
+#                 * std_reward
+#                 / np.sqrt(CONFIG["N_RUNS"])
+#             )
+#
+#             row = {
+#
+#                 "agent": agent_name,
+#
+#                 "top_k": k,
+#
+#                 "mean_reward": mean_reward,
+#
+#                 "std_reward": std_reward,
+#
+#                 "ci95": ci95,
+#
+#                 "min_reward": np.min(run_rewards),
+#
+#                 "max_reward": np.max(run_rewards),
+#             }
+#
+#             topk_rows.append(row)
+#
+#         random_reward = next(
+#             row["mean_reward"]
+#             for row in topk_rows
+#             if row["agent"] == "Random"
+#         )
+#
+#         for row in topk_rows:
+#
+#             improvement = (
+#                 (
+#                     row["mean_reward"]
+#                     - random_reward
+#                 )
+#                 / random_reward
+#             ) * 100
+#
+#             row["improvement_vs_random_pct"] = improvement
+#
+#         topk_rows = sorted(
+#             topk_rows,
+#             key=lambda x: x["mean_reward"],
+#             reverse=True
+#         )
+#
+#         for rank, row in enumerate(topk_rows, start=1):
+#
+#             row["rank"] = rank
+#
+#             all_results.append(row)
+#
+#             print(
+#                 f"{rank}. "
+#                 f"{row['agent']:<20}"
+#                 f"reward={row['mean_reward']:.4f} | "
+#                 f"std={row['std_reward']:.4f} | "
+#                 f"CI95=±{row['ci95']:.4f} | "
+#                 f"improvement={row['improvement_vs_random_pct']:+.2f}%"
+#             )
+#
+#     results_df = pd.DataFrame(all_results)
+#
+#     results_df = results_df[[
+#         "top_k",
+#         "rank",
+#         "agent",
+#         "mean_reward",
+#         "std_reward",
+#         "ci95",
+#         "min_reward",
+#         "max_reward",
+#         "improvement_vs_random_pct"
+#     ]]
+#
+#     print("\nFINAL RESULTS:")
+#     print(results_df.to_string(index=False))
+#
+#
+#     # ============================================================
+#     # PLOT
+#     # ============================================================
+#
+#     plt.figure(figsize=(10, 6))
+#
+#     for agent_name in results_df["agent"].unique():
+#
+#         subset = results_df[
+#             results_df["agent"] == agent_name
+#         ]
+#
+#         plt.plot(
+#             subset["top_k"],
+#             subset["mean_reward"],
+#             marker="o",
+#             label=agent_name
+#         )
+#
+#     plt.xlabel("Number of shown alternatives (TOP-K)")
+#     plt.ylabel("Mean acceptance reward")
+#     plt.title("Bandit Strategy Comparison")
+#     plt.legend()
+#     plt.grid(True)
+#     plt.show()
+#
+#
+# if __name__ == "__main__":
+#     main()

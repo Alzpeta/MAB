@@ -36,8 +36,9 @@ SCENARIOS = {
 
 def configure_run():
 
-    run_name = "mab_run_init"
-
+    # run_name = "mab_run_init"
+    import random
+    run_name = f"mab_run_init_{random.randint(1, 10000)}" #quick debug
     config_overrides = {
 
         # "N_CUSTOMERS": 5000,
@@ -46,7 +47,7 @@ def configure_run():
         # "SEED": 33,
     }
 
-    scenarios = SCENARIOS
+    scenarios = SCENARIOS #realne toto asi chceme poustet vzdy vsechno, takze...
 
     return run_name, config_overrides, scenarios
 
@@ -66,7 +67,7 @@ def apply_config_overrides(config_overrides):
         )
 
     mab.CONFIG.update(config_overrides)
-    np.random.seed(mab.CONFIG["SEED"])
+    np.random.seed(mab.CONFIG["SEED"]) #todo: proc se tu spousti ten seed?
 
 
 def format_duration(seconds):
@@ -208,25 +209,25 @@ def run_experiment_with_option_stats(agent_class, k, restaurant_tiers=None):
     agent = agent_class(mab.N_ARMS)
 
     rewards = []
-    shown_counts = np.zeros(mab.N_ARMS)
-    accepted_counts = np.zeros(mab.N_ARMS)
+    shown_counts = np.zeros(mab.N_ARMS) #why?
+    accepted_counts = np.zeros(mab.N_ARMS) #why?
 
-    env.reset()
+    env.reset() #ideme
 
     while True:
 
-        customer = env.get_customer()
+        customer = env.get_customer() #vezme se customer 0
 
-        available_options = mab.get_available_options(customer)
+        available_options = mab.get_available_options(customer) #dalsi agent ma zjevne jine options? takze ten seed by se mel asi delat tak, ze to je pro vsechny fer??
         available_indices = mab.option_names_to_indices(available_options)
 
         if len(available_indices) == 0:
-            displayed_arms = np.array([])
+            displayed_arms = np.array([]) #todo, toto je to co potrebujeme probrat
         else:
             displayed_arms = agent.select_arms(available_indices, k)
 
         for arm in displayed_arms:
-            shown_counts[arm] += 1
+            shown_counts[arm] += 1 #rekneme, ze arm se ukazal
 
         result = env.step(displayed_arms)
         reward = result["reward"]
@@ -242,7 +243,7 @@ def run_experiment_with_option_stats(agent_class, k, restaurant_tiers=None):
     option_rows = []
 
     for arm_index, option_name in enumerate(mab.OPTION_NAMES):
-
+        #zapiseme statisticku
         shown_count = shown_counts[arm_index]
         accepted_count = accepted_counts[arm_index]
 
@@ -269,12 +270,13 @@ def run_scenario(scenario_name, restaurant_tiers):
     restaurants = mab.generate_restaurants(restaurant_tiers)
     customers = mab.generate_customers(restaurants)
 
-    np.random.seed(mab.CONFIG["SEED"])
+    np.random.seed(mab.CONFIG["SEED"]) #hmm tohle by se nemelo teda nastavovat pred kazdym runem. je to safe?
+    #todo:check ve dvou runech ze se to chova jinak
 
     all_results = []
     all_option_results = []
 
-    for k in mab.CONFIG["N_SHOWN_OPTIONS_LIST"]:
+    for k in mab.CONFIG["N_SHOWN_OPTIONS_LIST"]: #zacneme s prvni volbou k - treba 1
 
         print("\n" + "=" * 60)
         print(f"SCENARIO = {scenario_name} | TOP-K = {k}")
@@ -282,7 +284,7 @@ def run_scenario(scenario_name, restaurant_tiers):
 
         topk_rows = []
 
-        for agent_name, agent_class in mab.AGENTS.items():
+        for agent_name, agent_class in mab.AGENTS.items(): #pro kazdeho agenta vezmu jeho jmeno a class
 
             run_rewards = []
             run_option_results = []
@@ -291,7 +293,7 @@ def run_scenario(scenario_name, restaurant_tiers):
             )
             progress_started_at = time.time()
 
-            for run in range(mab.CONFIG["N_RUNS"]):
+            for run in range(mab.CONFIG["N_RUNS"]): # a jedeme jednotlive runy
 
                 mean_reward, option_stats_df = run_experiment_with_option_stats(
                     agent_class,

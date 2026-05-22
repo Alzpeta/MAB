@@ -115,7 +115,7 @@ def test_ucb1_agent_uses_scores_for_remaining_slots_after_unexplored_arms():
 
     selected = agent.select_arms(available_indices, k=3)
 
-    assert selected.tolist() == [1, 3, 2]
+    assert selected.tolist() == [1, 2, 3]
 
 
 def test_thompson_sampling_agent_update_adjusts_alpha_and_beta():
