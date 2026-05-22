@@ -184,7 +184,7 @@ CONFIG = {
     "MAX_ACCEPTANCE_PROBABILITY": 0.95,
 }
 
-np.random.seed(CONFIG["SEED"])
+np.random.seed(CONFIG["SEED"]) #todo whyyy
 
 
 # ============================================================

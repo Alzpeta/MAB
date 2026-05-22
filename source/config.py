@@ -1,0 +1,76 @@
+CONFIG = {
+
+    "N_CUSTOMERS": 20000,
+
+    "N_RUNS": 30,
+
+    "SEED": 33,
+
+    "N_SHOWN_OPTIONS_LIST": [1,2,3,5],
+
+    "N_RESTAURANTS": 15,
+
+    "N_DAYS": 7, #todo: refactor the part where we add one extra day, so it is not hard coded to 7
+
+    "OPEN_HOUR": 11,
+    "CLOSE_HOUR": 23,
+
+    "SLOTS_PER_HOUR": 20,
+
+    "EVENING_PEAK_HOURS": [18, 19, 20, 21],
+
+    "EVENING_OCCUPANCY_BOOST": 0.20,
+
+    "WEEKEND_DAYS": [4, 5],
+
+    "WEEKEND_OCCUPANCY_BOOST": 0.15,
+
+    "TIER_BASE_OCCUPANCY": {
+        "budget": 0.45,
+        "midrange": 0.60,
+        "premium": 0.75,
+    },
+
+    "INITIAL_ACCEPTANCE_ESTIMATE": 0.15,
+
+    "DISCOUNT_AFFINITY_MEAN": 0.5,
+    "DISCOUNT_AFFINITY_STD": 0.2,
+
+    "TIME_FLEXIBILITY_MEAN": 0.5,
+    "TIME_FLEXIBILITY_STD": 0.2,
+
+    "LOYALTY_MEAN": 0.5,
+    "LOYALTY_STD": 0.2,
+
+    "PERK_AFFINITY_MEAN": 0.5,
+    "PERK_AFFINITY_STD": 0.2,
+
+    "URGENCY_MEAN": 0.5,
+    "URGENCY_STD": 0.25,
+
+    "BASE_UTILITY": -2.0,
+
+    "DISCOUNT_WEIGHT": 3.0,
+
+    "TIME_SHIFT_WEIGHT": 2.5,
+
+    "PERK_WEIGHT": 1.0,
+
+    "LOYALTY_WEIGHT": 0.1,
+
+
+    "URGENCY_DELAY_WEIGHT": 2.0,
+
+
+    "EVENING_DELAY_PENALTY": 0.7,
+
+    "GROUP_DELAY_PENALTY": 0.7,
+
+    "NOISE_STD": 0.6,
+
+
+    "TIME_SHIFT_NORMALIZER": 1440,
+
+    "MIN_ACCEPTANCE_PROBABILITY": 0.01,
+    "MAX_ACCEPTANCE_PROBABILITY": 0.95,
+}
