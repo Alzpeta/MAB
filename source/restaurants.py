@@ -300,7 +300,9 @@ def generate_restaurants(restaurant_tiers=None):
                 )
 
                 calendar[day][hour] = occupied
+
         calendar[CONFIG["N_DAYS"]] = calendar[0]
+
         restaurants.append({
 
             "restaurant_id": restaurant_id,
