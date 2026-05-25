@@ -8,9 +8,7 @@ CONFIG = {
 
     "N_SHOWN_OPTIONS_LIST": [1,2,3,5],
 
-    "N_RESTAURANTS": 15,
-
-    "N_DAYS": 7, #todo: refactor the part where we add one extra day, so it is not hard coded to 7
+    "N_DAYS": 7,
 
     "OPEN_HOUR": 11,
     "CLOSE_HOUR": 23,

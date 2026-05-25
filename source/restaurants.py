@@ -1,9 +1,12 @@
+from .config import CONFIG
+import numpy as np
+
 RESTAURANT_CONFIGS = {
 
     0: {
         "name": "Lacny Tanier",
         "tier": "budget",
-        "tag": "high-compensation", # information-only tag
+        "tag": "high-compensation",  # information-only tag
         "allowed_options": [
             "discount_20pct",
             "60min_plus_20pct",
@@ -224,3 +227,96 @@ RESTAURANT_CONFIGS = {
         ]
     },
 }
+
+
+def generate_restaurants(restaurant_tiers=None):
+    restaurants = []
+
+    restaurant_tiers = (
+        set(restaurant_tiers)
+        if restaurant_tiers is not None
+        else None
+    )
+
+    restaurant_items = [
+        (
+            restaurant_id,
+            RESTAURANT_CONFIGS[restaurant_id]
+        )
+        for restaurant_id in range(len(RESTAURANT_CONFIGS))
+    ]
+
+    for restaurant_id, config in restaurant_items:
+
+        if (
+                restaurant_tiers is not None
+                and config["tier"] not in restaurant_tiers
+        ):
+            continue
+
+        calendar = {}
+
+        tier = config["tier"]
+
+        for day in range(CONFIG["N_DAYS"]):
+
+            calendar[day] = {}
+
+            for hour in range(
+                    CONFIG["OPEN_HOUR"],
+                    CONFIG["CLOSE_HOUR"]
+            ):
+
+                base_occupancy = (
+                    CONFIG["TIER_BASE_OCCUPANCY"][tier]
+                )
+
+                occupancy_ratio = base_occupancy
+
+                if hour in CONFIG["EVENING_PEAK_HOURS"]:
+                    occupancy_ratio += (
+                        CONFIG["EVENING_OCCUPANCY_BOOST"]
+                    )
+
+                if day in CONFIG["WEEKEND_DAYS"]:
+                    occupancy_ratio += (
+                        CONFIG["WEEKEND_OCCUPANCY_BOOST"]
+                    )
+
+                occupancy_ratio += np.random.normal(
+                    0,
+                    0.08
+                )
+
+                occupancy_ratio = np.clip(
+                    occupancy_ratio,
+                    0.05,
+                    1.00
+                )
+
+                occupied = int(
+                    occupancy_ratio
+                    * CONFIG["SLOTS_PER_HOUR"]
+                )
+
+                calendar[day][hour] = occupied
+        calendar[CONFIG["N_DAYS"]] = calendar[0]
+        restaurants.append({
+
+            "restaurant_id": restaurant_id,
+
+            "name": config["name"],
+
+            "tier": config["tier"],
+
+            "allowed_options":
+                config["allowed_options"],
+
+            "calendar": calendar,
+
+            "open_hour": CONFIG["OPEN_HOUR"],
+
+            "close_hour": CONFIG["CLOSE_HOUR"]
+        })
+
+    return restaurants

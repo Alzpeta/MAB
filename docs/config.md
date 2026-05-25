@@ -26,12 +26,7 @@ The main configuration is stored in `source/config.py` in the `CONFIG` dictionar
 - Default value: `[1, 2, 3, 5]`
 - Numbers of alternative offers tested as shown options.
 
-## Restaurants and Time
-
-#### `N_RESTAURANTS`
-
-- Set value: `15` (can't be changed)
-- Number of restaurants in the simulation.
+## Time
 
 #### `N_DAYS`
 

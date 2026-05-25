@@ -86,3 +86,41 @@ The table below shows how many restaurant configurations include each option.
 | next_day_plus_drink            |           0 |
 | 60min_plus_5pct                |           0 |
 | 60min_plus_5pct_plus_dessert   |           0 |
+
+## `generate_restaurants`
+
+`generate_restaurants(restaurant_tiers=None)` builds the runtime restaurant objects from `RESTAURANT_CONFIGS`.
+
+When `restaurant_tiers` is `None`, the function creates all configured restaurants. When one or more tiers are passed in, it creates only restaurants whose `tier` is included in that filter.
+
+The function first converts the tier filter to a set, then builds restaurant items in numeric `restaurant_id` order. Each item has the shape:
+
+```python
+(restaurant_id, RESTAURANT_CONFIGS[restaurant_id])
+```
+
+For every selected restaurant, the function creates a calendar. The calendar is indexed by day and hour. For each day from `0` to `CONFIG["N_DAYS"] - 1`, and for each open hour from `CONFIG["OPEN_HOUR"]` to `CONFIG["CLOSE_HOUR"] - 1`, it computes occupied slots from an occupancy ratio.
+
+The occupancy ratio starts with `CONFIG["TIER_BASE_OCCUPANCY"][tier]`. It is then adjusted by:
+
+- `CONFIG["EVENING_OCCUPANCY_BOOST"]` when the hour is in `CONFIG["EVENING_PEAK_HOURS"]`.
+- `CONFIG["WEEKEND_OCCUPANCY_BOOST"]` when the day is in `CONFIG["WEEKEND_DAYS"]`.
+- Random normal noise from `np.random.normal(0, 0.08)`.
+
+After these adjustments, the ratio is clipped to the interval from `0.05` to `1.00`. This prevents impossible occupancy values, such as a peak-hour value above 100%. The final number of occupied slots is:
+
+```python
+int(occupancy_ratio * CONFIG["SLOTS_PER_HOUR"])
+```
+
+The function also stores `calendar[CONFIG["N_DAYS"]] = calendar[0]`. This extra day repeats day `0` so that a customer requesting the last modeled day can still receive a next-day option and availability can be checked. In practical terms, the next Monday is treated as the same occupancy pattern as the previous Monday.
+
+Each generated restaurant object contains:
+
+- `restaurant_id`
+- `name`
+- `tier`
+- `allowed_options`
+- `calendar`
+- `open_hour`
+- `close_hour`
