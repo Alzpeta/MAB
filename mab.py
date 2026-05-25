@@ -23,7 +23,7 @@
 # They do NOT observe latent user preferences.
 #
 # ============================================================
-
+#xxxx
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -185,7 +185,7 @@ CONFIG = {
 }
 
 np.random.seed(CONFIG["SEED"]) #todo whyyy
-
+#yyyy
 
 # ============================================================
 # OPTION CATALOG
