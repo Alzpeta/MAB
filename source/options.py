@@ -242,6 +242,33 @@ ALL_OPTIONS = {
     },
 }
 
+def option_category(option_name):
+
+    option = ALL_OPTIONS[option_name]
+    has_time_shift = option["time_shift"] > 0
+    has_discount = option["discount"] > 0
+    has_perk = option["perk_value"] > 0
+
+    if has_time_shift and has_discount and has_perk:
+        return "time_discount_perk"
+
+    if has_time_shift and has_discount:
+        return "time_discount"
+
+    if has_time_shift and has_perk:
+        return "time_perk"
+
+    if has_discount:
+        return "discount_only"
+
+    if has_perk:
+        return "perk_only"
+
+    if has_time_shift:
+        return "time_only"
+
+    return "other"
+
 OPTION_NAMES = list(ALL_OPTIONS.keys())
 
 N_ARMS = len(OPTION_NAMES)

@@ -5,6 +5,8 @@ import os
 import sys
 import time
 
+from source.config import CONFIG
+
 Path("outputs/matplotlib_cache").mkdir(parents=True, exist_ok=True)
 os.environ.setdefault(
     "MPLCONFIGDIR",
@@ -23,8 +25,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-import mab
-
 
 SCENARIOS = {
     "all": None,
@@ -36,9 +36,7 @@ SCENARIOS = {
 
 def configure_run():
 
-    # run_name = "mab_run_init"
-    import random
-    run_name = f"mab_run_init_{random.randint(1, 10000)}" #quick debug
+    run_name = f"mab_run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     config_overrides = {
 
         # "N_CUSTOMERS": 5000,
@@ -47,7 +45,7 @@ def configure_run():
         # "SEED": 33,
     }
 
-    scenarios = SCENARIOS #realne toto asi chceme poustet vzdy vsechno, takze...
+    scenarios = SCENARIOS
 
     return run_name, config_overrides, scenarios
 
@@ -57,7 +55,7 @@ def apply_config_overrides(config_overrides):
     unknown_keys = sorted(
         key
         for key in config_overrides
-        if key not in mab.CONFIG
+        if key not in CONFIG
     )
 
     if unknown_keys:
@@ -66,8 +64,8 @@ def apply_config_overrides(config_overrides):
             + ", ".join(unknown_keys)
         )
 
-    mab.CONFIG.update(config_overrides)
-    np.random.seed(mab.CONFIG["SEED"]) #todo: proc se tu spousti ten seed?
+    CONFIG.update(config_overrides)
+    np.random.seed(CONFIG["SEED"])
 
 
 def format_duration(seconds):
@@ -172,111 +170,116 @@ def restaurants_to_dataframe(restaurants):
 
     return pd.DataFrame(rows)
 
+from source.options import option_category
+# def option_category(option_name):
+#
+#     option = ALL_OPTIONS[option_name]
+#     has_time_shift = option["time_shift"] > 0
+#     has_discount = option["discount"] > 0
+#     has_perk = option["perk_value"] > 0
+#
+#     if has_time_shift and has_discount and has_perk:
+#         return "time_discount_perk"
+#
+#     if has_time_shift and has_discount:
+#         return "time_discount"
+#
+#     if has_time_shift and has_perk:
+#         return "time_perk"
+#
+#     if has_discount:
+#         return "discount_only"
+#
+#     if has_perk:
+#         return "perk_only"
+#
+#     if has_time_shift:
+#         return "time_only"
+#
+#     return "other"
 
-def option_category(option_name):
+from source.restaurants import generate_restaurants
+from source.customers import generate_customers
+from source.reservation import ReservationEnvironment
+from source.options import N_ARMS
 
-    option = mab.ALL_OPTIONS[option_name]
-    has_time_shift = option["time_shift"] > 0
-    has_discount = option["discount"] > 0
-    has_perk = option["perk_value"] > 0
+# def run_experiment_with_option_stats(agent_class, k, restaurant_tiers=None):
+#
+#     restaurants = generate_restaurants(restaurant_tiers)
+#     customers = generate_customers(restaurants)
+#     env = ReservationEnvironment(customers)
+#     agent = agent_class(N_ARMS)
+#
+#     rewards = []
+#     shown_counts = np.zeros(N_ARMS)
+#     accepted_counts = np.zeros(N_ARMS)
+#
+#     env.reset()
+#
+#     while True:
+#
+#         customer = env.get_customer() #vezme se customer 0
+#
+#         available_options = mab.get_available_options(customer) #dalsi agent ma zjevne jine options? takze ten seed by se mel asi delat tak, ze to je pro vsechny fer??
+#         available_indices = mab.option_names_to_indices(available_options)
+#
+#         if len(available_indices) == 0:
+#             displayed_arms = np.array([]) #todo, toto je to co potrebujeme probrat
+#         else:
+#             displayed_arms = agent.select_arms(available_indices, k)
+#
+#         for arm in displayed_arms:
+#             shown_counts[arm] += 1 #rekneme, ze arm se ukazal
+#
+#         result = env.step(displayed_arms)
+#         reward = result["reward"]
+#         rewards.append(reward)
+#
+#         if result["chosen_arm"] is not None:
+#             accepted_counts[result["chosen_arm"]] += 1
+#             agent.update(result["chosen_arm"], reward)
+#
+#         if result["done"]:
+#             break
+#
+#     option_rows = []
+#
+#     for arm_index, option_name in enumerate(mab.OPTION_NAMES):
+#         #zapiseme statisticku
+#         shown_count = shown_counts[arm_index]
+#         accepted_count = accepted_counts[arm_index]
+#
+#         if shown_count == 0:
+#             acceptance_rate = np.nan
+#         else:
+#             acceptance_rate = accepted_count / shown_count
+#
+#         option_rows.append({
+#             "option_name": option_name,
+#             "option_category": option_category(option_name),
+#             "shown_count": shown_count,
+#             "accepted_count": accepted_count,
+#             "acceptance_rate": acceptance_rate,
+#         })
+#
+#     return np.mean(rewards), pd.DataFrame(option_rows)
 
-    if has_time_shift and has_discount and has_perk:
-        return "time_discount_perk"
-
-    if has_time_shift and has_discount:
-        return "time_discount"
-
-    if has_time_shift and has_perk:
-        return "time_perk"
-
-    if has_discount:
-        return "discount_only"
-
-    if has_perk:
-        return "perk_only"
-
-    if has_time_shift:
-        return "time_only"
-
-    return "other"
-
-
-def run_experiment_with_option_stats(agent_class, k, restaurant_tiers=None):
-
-    restaurants = mab.generate_restaurants(restaurant_tiers)
-    customers = mab.generate_customers(restaurants)
-    env = mab.ReservationEnvironment(customers)
-    agent = agent_class(mab.N_ARMS)
-
-    rewards = []
-    shown_counts = np.zeros(mab.N_ARMS) #why?
-    accepted_counts = np.zeros(mab.N_ARMS) #why?
-
-    env.reset() #ideme
-
-    while True:
-
-        customer = env.get_customer() #vezme se customer 0
-
-        available_options = mab.get_available_options(customer) #dalsi agent ma zjevne jine options? takze ten seed by se mel asi delat tak, ze to je pro vsechny fer??
-        available_indices = mab.option_names_to_indices(available_options)
-
-        if len(available_indices) == 0:
-            displayed_arms = np.array([]) #todo, toto je to co potrebujeme probrat
-        else:
-            displayed_arms = agent.select_arms(available_indices, k)
-
-        for arm in displayed_arms:
-            shown_counts[arm] += 1 #rekneme, ze arm se ukazal
-
-        result = env.step(displayed_arms)
-        reward = result["reward"]
-        rewards.append(reward)
-
-        if result["chosen_arm"] is not None:
-            accepted_counts[result["chosen_arm"]] += 1
-            agent.update(result["chosen_arm"], reward)
-
-        if result["done"]:
-            break
-
-    option_rows = []
-
-    for arm_index, option_name in enumerate(mab.OPTION_NAMES):
-        #zapiseme statisticku
-        shown_count = shown_counts[arm_index]
-        accepted_count = accepted_counts[arm_index]
-
-        if shown_count == 0:
-            acceptance_rate = np.nan
-        else:
-            acceptance_rate = accepted_count / shown_count
-
-        option_rows.append({
-            "option_name": option_name,
-            "option_category": option_category(option_name),
-            "shown_count": shown_count,
-            "accepted_count": accepted_count,
-            "acceptance_rate": acceptance_rate,
-        })
-
-    return np.mean(rewards), pd.DataFrame(option_rows)
-
-
+from source.agents import AGENTS
+from source.experiment import run_experiment_with_option_stats
 def run_scenario(scenario_name, restaurant_tiers):
 
-    np.random.seed(mab.CONFIG["SEED"])
+    np.random.seed(CONFIG["SEED"])
 
-    restaurants = mab.generate_restaurants(restaurant_tiers)
-    customers = mab.generate_customers(restaurants)
+    restaurants = generate_restaurants(restaurant_tiers)
+    customers = generate_customers(restaurants)
 
-    np.random.seed(mab.CONFIG["SEED"]) #hmm tohle by se nemelo teda nastavovat pred kazdym runem. je to safe?
+    np.random.seed(CONFIG["SEED"]) #hmm tohle by se nemelo teda nastavovat pred kazdym runem. je to safe?
     #todo:check ve dvou runech ze se to chova jinak
 
     all_results = []
     all_option_results = []
 
-    for k in mab.CONFIG["N_SHOWN_OPTIONS_LIST"]: #zacneme s prvni volbou k - treba 1
+    for k in CONFIG["N_SHOWN_OPTIONS_LIST"]:
 
         print("\n" + "=" * 60)
         print(f"SCENARIO = {scenario_name} | TOP-K = {k}")
@@ -284,7 +287,7 @@ def run_scenario(scenario_name, restaurant_tiers):
 
         topk_rows = []
 
-        for agent_name, agent_class in mab.AGENTS.items(): #pro kazdeho agenta vezmu jeho jmeno a class
+        for agent_name, agent_class in AGENTS.items(): #pro kazdeho agenta vezmu jeho jmeno a class
 
             run_rewards = []
             run_option_results = []
@@ -293,7 +296,7 @@ def run_scenario(scenario_name, restaurant_tiers):
             )
             progress_started_at = time.time()
 
-            for run in range(mab.CONFIG["N_RUNS"]): # a jedeme jednotlive runy
+            for run in range(CONFIG["N_RUNS"]): # a jedeme jednotlive runy
 
                 mean_reward, option_stats_df = run_experiment_with_option_stats(
                     agent_class,
@@ -308,7 +311,7 @@ def run_scenario(scenario_name, restaurant_tiers):
                 print_progress(
                     progress_label,
                     run + 1,
-                    mab.CONFIG["N_RUNS"],
+                    CONFIG["N_RUNS"],
                     progress_started_at
                 )
 
@@ -356,7 +359,7 @@ def run_scenario(scenario_name, restaurant_tiers):
                 "top_k": k,
                 "mean_reward": mean_reward,
                 "std_reward": std_reward,
-                "ci95": 1.96 * std_reward / np.sqrt(mab.CONFIG["N_RUNS"]),
+                "ci95": 1.96 * std_reward / np.sqrt(CONFIG["N_RUNS"]),
                 "min_reward": np.min(run_rewards),
                 "max_reward": np.max(run_rewards),
             }
@@ -406,17 +409,19 @@ def run_scenario(scenario_name, restaurant_tiers):
         customers_to_dataframe(customers),
     )
 
+from source.options import ALL_OPTIONS
+from source.restaurants import RESTAURANT_CONFIGS
 
 def save_config(output_dir, run_name, config_overrides, scenarios):
 
     config_output = {
         "run_name": run_name,
         "config_overrides": config_overrides,
-        "config": mab.CONFIG,
+        "config": CONFIG,
         "scenarios": scenarios,
-        "agents": list(mab.AGENTS.keys()),
-        "options": mab.ALL_OPTIONS,
-        "restaurant_configs": mab.RESTAURANT_CONFIGS,
+        "agents": list(AGENTS.keys()),
+        "options": ALL_OPTIONS,
+        "restaurant_configs": RESTAURANT_CONFIGS,
     }
 
     with (output_dir / "config_used.json").open("w", encoding="utf-8") as file:
@@ -597,8 +602,8 @@ def plot_customer_sample(customers_df, scenario_name, output_dir):
     customers_df["requested_hour"].plot(
         kind="hist",
         bins=range(
-            mab.CONFIG["OPEN_HOUR"],
-            mab.CONFIG["CLOSE_HOUR"] + 1
+            CONFIG["OPEN_HOUR"],
+            CONFIG["CLOSE_HOUR"] + 1
         ),
         ax=axes[0, 0],
         title="Requested hour"
