@@ -5,6 +5,13 @@ import os
 import sys
 import time
 
+from source.restaurants import generate_restaurants, RESTAURANT_CONFIGS
+from source.customers import generate_customers
+from source.agents import AGENTS
+from source.experiment import run_experiment_with_option_stats
+from source.options import ALL_OPTIONS
+from source.config import CONFIG
+
 Path("outputs/matplotlib_cache").mkdir(parents=True, exist_ok=True)
 os.environ.setdefault(
     "MPLCONFIGDIR",
@@ -23,9 +30,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-import mab
-
-
 SCENARIOS = {
     "all": None,
     "budget": ["budget"],
@@ -35,10 +39,7 @@ SCENARIOS = {
 
 
 def configure_run():
-
-    # run_name = "mab_run_init"
-    import random
-    run_name = f"mab_run_init_{random.randint(1, 10000)}" #quick debug
+    run_name = f"mab_run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     config_overrides = {
 
         # "N_CUSTOMERS": 5000,
@@ -47,17 +48,16 @@ def configure_run():
         # "SEED": 33,
     }
 
-    scenarios = SCENARIOS #realne toto asi chceme poustet vzdy vsechno, takze...
+    scenarios = SCENARIOS
 
     return run_name, config_overrides, scenarios
 
 
 def apply_config_overrides(config_overrides):
-
     unknown_keys = sorted(
         key
         for key in config_overrides
-        if key not in mab.CONFIG
+        if key not in CONFIG
     )
 
     if unknown_keys:
@@ -66,12 +66,11 @@ def apply_config_overrides(config_overrides):
             + ", ".join(unknown_keys)
         )
 
-    mab.CONFIG.update(config_overrides)
-    np.random.seed(mab.CONFIG["SEED"]) #todo: proc se tu spousti ten seed?
+    CONFIG.update(config_overrides)
+    np.random.seed(CONFIG["SEED"])
 
 
 def format_duration(seconds):
-
     seconds = int(seconds)
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
@@ -83,7 +82,6 @@ def format_duration(seconds):
 
 
 def print_progress(label, current, total, start_time):
-
     elapsed = time.time() - start_time
     progress = current / total if total else 1
     bar_width = 28
@@ -116,7 +114,6 @@ def print_progress(label, current, total, start_time):
 
 
 def make_output_dir(run_name=None):
-
     if run_name is None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         run_name = f"mab_run_{timestamp}"
@@ -134,11 +131,9 @@ def make_output_dir(run_name=None):
 
 
 def customers_to_dataframe(customers):
-
     rows = []
 
     for customer in customers:
-
         rows.append({
             "customer_id": customer["customer_id"],
             "restaurant_id": customer["restaurant_id"],
@@ -158,11 +153,9 @@ def customers_to_dataframe(customers):
 
 
 def restaurants_to_dataframe(restaurants):
-
     rows = []
 
     for restaurant in restaurants:
-
         rows.append({
             "restaurant_id": restaurant["restaurant_id"],
             "name": restaurant["name"],
@@ -173,110 +166,19 @@ def restaurants_to_dataframe(restaurants):
     return pd.DataFrame(rows)
 
 
-def option_category(option_name):
-
-    option = mab.ALL_OPTIONS[option_name]
-    has_time_shift = option["time_shift"] > 0
-    has_discount = option["discount"] > 0
-    has_perk = option["perk_value"] > 0
-
-    if has_time_shift and has_discount and has_perk:
-        return "time_discount_perk"
-
-    if has_time_shift and has_discount:
-        return "time_discount"
-
-    if has_time_shift and has_perk:
-        return "time_perk"
-
-    if has_discount:
-        return "discount_only"
-
-    if has_perk:
-        return "perk_only"
-
-    if has_time_shift:
-        return "time_only"
-
-    return "other"
-
-
-def run_experiment_with_option_stats(agent_class, k, restaurant_tiers=None):
-
-    restaurants = mab.generate_restaurants(restaurant_tiers)
-    customers = mab.generate_customers(restaurants)
-    env = mab.ReservationEnvironment(customers)
-    agent = agent_class(mab.N_ARMS)
-
-    rewards = []
-    shown_counts = np.zeros(mab.N_ARMS) #why?
-    accepted_counts = np.zeros(mab.N_ARMS) #why?
-
-    env.reset() #ideme
-
-    while True:
-
-        customer = env.get_customer() #vezme se customer 0
-
-        available_options = mab.get_available_options(customer) #dalsi agent ma zjevne jine options? takze ten seed by se mel asi delat tak, ze to je pro vsechny fer??
-        available_indices = mab.option_names_to_indices(available_options)
-
-        if len(available_indices) == 0:
-            displayed_arms = np.array([]) #todo, toto je to co potrebujeme probrat
-        else:
-            displayed_arms = agent.select_arms(available_indices, k)
-
-        for arm in displayed_arms:
-            shown_counts[arm] += 1 #rekneme, ze arm se ukazal
-
-        result = env.step(displayed_arms)
-        reward = result["reward"]
-        rewards.append(reward)
-
-        if result["chosen_arm"] is not None:
-            accepted_counts[result["chosen_arm"]] += 1
-            agent.update(result["chosen_arm"], reward)
-
-        if result["done"]:
-            break
-
-    option_rows = []
-
-    for arm_index, option_name in enumerate(mab.OPTION_NAMES):
-        #zapiseme statisticku
-        shown_count = shown_counts[arm_index]
-        accepted_count = accepted_counts[arm_index]
-
-        if shown_count == 0:
-            acceptance_rate = np.nan
-        else:
-            acceptance_rate = accepted_count / shown_count
-
-        option_rows.append({
-            "option_name": option_name,
-            "option_category": option_category(option_name),
-            "shown_count": shown_count,
-            "accepted_count": accepted_count,
-            "acceptance_rate": acceptance_rate,
-        })
-
-    return np.mean(rewards), pd.DataFrame(option_rows)
-
-
 def run_scenario(scenario_name, restaurant_tiers):
+    np.random.seed(CONFIG["SEED"])
 
-    np.random.seed(mab.CONFIG["SEED"])
+    restaurants = generate_restaurants(restaurant_tiers)
+    customers = generate_customers(restaurants)
 
-    restaurants = mab.generate_restaurants(restaurant_tiers)
-    customers = mab.generate_customers(restaurants)
-
-    np.random.seed(mab.CONFIG["SEED"]) #hmm tohle by se nemelo teda nastavovat pred kazdym runem. je to safe?
-    #todo:check ve dvou runech ze se to chova jinak
+    np.random.seed(CONFIG["SEED"])  # hmm tohle by se nemelo teda nastavovat pred kazdym runem. je to safe?
+    # todo:check ve dvou runech ze se to chova jinak
 
     all_results = []
     all_option_results = []
 
-    for k in mab.CONFIG["N_SHOWN_OPTIONS_LIST"]: #zacneme s prvni volbou k - treba 1
+    for k in CONFIG["N_SHOWN_OPTIONS_LIST"]:
 
         print("\n" + "=" * 60)
         print(f"SCENARIO = {scenario_name} | TOP-K = {k}")
@@ -284,7 +186,7 @@ def run_scenario(scenario_name, restaurant_tiers):
 
         topk_rows = []
 
-        for agent_name, agent_class in mab.AGENTS.items(): #pro kazdeho agenta vezmu jeho jmeno a class
+        for agent_name, agent_class in AGENTS.items():  # pro kazdeho agenta vezmu jeho jmeno a class
 
             run_rewards = []
             run_option_results = []
@@ -293,7 +195,7 @@ def run_scenario(scenario_name, restaurant_tiers):
             )
             progress_started_at = time.time()
 
-            for run in range(mab.CONFIG["N_RUNS"]): # a jedeme jednotlive runy
+            for run in range(CONFIG["N_RUNS"]):  # a jedeme jednotlive runy
 
                 mean_reward, option_stats_df = run_experiment_with_option_stats(
                     agent_class,
@@ -308,7 +210,7 @@ def run_scenario(scenario_name, restaurant_tiers):
                 print_progress(
                     progress_label,
                     run + 1,
-                    mab.CONFIG["N_RUNS"],
+                    CONFIG["N_RUNS"],
                     progress_started_at
                 )
 
@@ -324,8 +226,8 @@ def run_scenario(scenario_name, restaurant_tiers):
                 .sum()
             )
             option_summary_df["acceptance_rate"] = (
-                option_summary_df["accepted_count"]
-                / option_summary_df["shown_count"]
+                    option_summary_df["accepted_count"]
+                    / option_summary_df["shown_count"]
             )
             option_summary_df["acceptance_rate"] = (
                 option_summary_df["acceptance_rate"]
@@ -356,7 +258,7 @@ def run_scenario(scenario_name, restaurant_tiers):
                 "top_k": k,
                 "mean_reward": mean_reward,
                 "std_reward": std_reward,
-                "ci95": 1.96 * std_reward / np.sqrt(mab.CONFIG["N_RUNS"]),
+                "ci95": 1.96 * std_reward / np.sqrt(CONFIG["N_RUNS"]),
                 "min_reward": np.min(run_rewards),
                 "max_reward": np.max(run_rewards),
             }
@@ -375,9 +277,9 @@ def run_scenario(scenario_name, restaurant_tiers):
                 row["improvement_vs_random_pct"] = np.nan
             else:
                 row["improvement_vs_random_pct"] = (
-                    (row["mean_reward"] - random_reward)
-                    / random_reward
-                ) * 100
+                                                           (row["mean_reward"] - random_reward)
+                                                           / random_reward
+                                                   ) * 100
 
         topk_rows = sorted(
             topk_rows,
@@ -386,7 +288,6 @@ def run_scenario(scenario_name, restaurant_tiers):
         )
 
         for rank, row in enumerate(topk_rows, start=1):
-
             row["rank"] = rank
             all_results.append(row)
 
@@ -408,15 +309,14 @@ def run_scenario(scenario_name, restaurant_tiers):
 
 
 def save_config(output_dir, run_name, config_overrides, scenarios):
-
     config_output = {
         "run_name": run_name,
         "config_overrides": config_overrides,
-        "config": mab.CONFIG,
+        "config": CONFIG,
         "scenarios": scenarios,
-        "agents": list(mab.AGENTS.keys()),
-        "options": mab.ALL_OPTIONS,
-        "restaurant_configs": mab.RESTAURANT_CONFIGS,
+        "agents": list(AGENTS.keys()),
+        "options": ALL_OPTIONS,
+        "restaurant_configs": RESTAURANT_CONFIGS,
     }
 
     with (output_dir / "config_used.json").open("w", encoding="utf-8") as file:
@@ -424,7 +324,6 @@ def save_config(output_dir, run_name, config_overrides, scenarios):
 
 
 def save_pretty_table(df, output_path, title):
-
     display_df = df.copy()
 
     for column in display_df.columns:
@@ -485,7 +384,6 @@ def save_pretty_table(df, output_path, title):
 
 
 def draw_heatmap(data, title, output_path, value_format=".3f"):
-
     fig_width = max(8, len(data.columns) * 1.4)
     fig_height = max(5, len(data.index) * 0.6)
 
@@ -529,11 +427,9 @@ def draw_heatmap(data, title, output_path, value_format=".3f"):
 
 
 def plot_scenario_results(results_df, scenario_name, output_dir):
-
     plt.figure(figsize=(10, 6))
 
     for agent_name in results_df["agent"].unique():
-
         subset = results_df[results_df["agent"] == agent_name]
 
         plt.plot(
@@ -554,7 +450,6 @@ def plot_scenario_results(results_df, scenario_name, output_dir):
 
 
 def plot_result_tables(results_df, scenario_name, output_dir):
-
     reward_pivot = results_df.pivot(
         index="agent",
         columns="top_k",
@@ -591,14 +486,13 @@ def plot_result_tables(results_df, scenario_name, output_dir):
 
 
 def plot_customer_sample(customers_df, scenario_name, output_dir):
-
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
 
     customers_df["requested_hour"].plot(
         kind="hist",
         bins=range(
-            mab.CONFIG["OPEN_HOUR"],
-            mab.CONFIG["CLOSE_HOUR"] + 1
+            CONFIG["OPEN_HOUR"],
+            CONFIG["CLOSE_HOUR"] + 1
         ),
         ax=axes[0, 0],
         title="Requested hour"
@@ -638,7 +532,6 @@ def plot_customer_sample(customers_df, scenario_name, output_dir):
 
 
 def plot_option_category_results(option_results_df, scenario_name, output_dir):
-
     category_df = (
         option_results_df
         .groupby("option_category", as_index=False)
@@ -646,8 +539,8 @@ def plot_option_category_results(option_results_df, scenario_name, output_dir):
         .sum()
     )
     category_df["acceptance_rate"] = (
-        category_df["accepted_count"]
-        / category_df["shown_count"]
+            category_df["accepted_count"]
+            / category_df["shown_count"]
     )
     category_df["acceptance_rate"] = (
         category_df["acceptance_rate"]
@@ -683,7 +576,6 @@ def plot_option_category_results(option_results_df, scenario_name, output_dir):
 
 
 def plot_top_options(option_results_df, scenario_name, output_dir):
-
     option_df = (
         option_results_df
         .groupby(["option_name", "option_category"], as_index=False)
@@ -691,8 +583,8 @@ def plot_top_options(option_results_df, scenario_name, output_dir):
         .sum()
     )
     option_df["acceptance_rate"] = (
-        option_df["accepted_count"]
-        / option_df["shown_count"]
+            option_df["accepted_count"]
+            / option_df["shown_count"]
     )
     option_df["acceptance_rate"] = (
         option_df["acceptance_rate"]
@@ -700,7 +592,7 @@ def plot_top_options(option_results_df, scenario_name, output_dir):
     )
     option_df = option_df[
         option_df["shown_count"] > 0
-    ].sort_values(
+        ].sort_values(
         ["accepted_count", "acceptance_rate"],
         ascending=False
     ).head(15)
@@ -726,7 +618,6 @@ def plot_top_options(option_results_df, scenario_name, output_dir):
 
 
 def plot_option_agent_heatmap(option_results_df, scenario_name, output_dir):
-
     category_agent_df = (
         option_results_df
         .groupby(["option_category", "agent"], as_index=False)
@@ -734,8 +625,8 @@ def plot_option_agent_heatmap(option_results_df, scenario_name, output_dir):
         .sum()
     )
     category_agent_df["acceptance_rate"] = (
-        category_agent_df["accepted_count"]
-        / category_agent_df["shown_count"]
+            category_agent_df["accepted_count"]
+            / category_agent_df["shown_count"]
     )
     category_agent_df["acceptance_rate"] = (
         category_agent_df["acceptance_rate"]
@@ -756,7 +647,6 @@ def plot_option_agent_heatmap(option_results_df, scenario_name, output_dir):
 
 
 def plot_overall_comparison(all_results_df, output_dir):
-
     best_results = (
         all_results_df.sort_values(
             ["scenario", "top_k", "mean_reward"],
@@ -767,9 +657,9 @@ def plot_overall_comparison(all_results_df, output_dir):
     )
 
     labels = (
-        best_results["scenario"]
-        + " | k="
-        + best_results["top_k"].astype(str)
+            best_results["scenario"]
+            + " | k="
+            + best_results["top_k"].astype(str)
     )
 
     plt.figure(figsize=(12, 6))
@@ -783,7 +673,6 @@ def plot_overall_comparison(all_results_df, output_dir):
 
 
 def plot_overall_result_heatmap(all_results_df, output_dir):
-
     best_by_agent = (
         all_results_df
         .sort_values("mean_reward", ascending=False)
@@ -805,7 +694,6 @@ def plot_overall_result_heatmap(all_results_df, output_dir):
 
 
 def main():
-
     run_name, config_overrides, scenarios = configure_run()
     apply_config_overrides(config_overrides)
 
@@ -816,7 +704,6 @@ def main():
     scenario_option_results = []
 
     for scenario_name, restaurant_tiers in scenarios.items():
-
         scenario_dir = output_dir / scenario_name
         scenario_dir.mkdir()
 
@@ -832,8 +719,8 @@ def main():
             .sum()
         )
         option_category_df["acceptance_rate"] = (
-            option_category_df["accepted_count"]
-            / option_category_df["shown_count"]
+                option_category_df["accepted_count"]
+                / option_category_df["shown_count"]
         )
         option_category_df["acceptance_rate"] = (
             option_category_df["acceptance_rate"]
