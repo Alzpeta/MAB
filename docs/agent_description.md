@@ -111,6 +111,21 @@ This agent does not use learned values when selecting arms. It is used as a base
 
 ## `EpsilonGreedyAgent`
 
+$$
+a =
+\begin{cases}
+\text{RandomArm}, & \text{with probability } \epsilon \\
+\arg\max_i Q_i, & \text{with probability } 1-\epsilon
+\end{cases}
+$$
+
+where:
+
+- $a$ = selected arm
+- $Q_i$ = estimated reward of arm $i$
+- $\epsilon$ = exploration probability
+
+
 `EpsilonGreedyAgent` mixes exploration and exploitation.
 
 It has:
@@ -138,6 +153,24 @@ The returned indices are converted back from local positions into real arm indic
 **AP:** Outside tests, `epsilon` is currently treated as a standard fixed value and is not changed.
 
 ## `DecayEpsilonAgent`
+
+$$
+\epsilon_t
+=
+\max
+\left(
+\epsilon_{\min},
+\frac{\epsilon_0}{\sqrt{t}}
+\right)
+$$
+
+where:
+
+- $\epsilon_t$ = exploration probability at timestep $t$
+- $\epsilon_0$ = initial exploration probability
+- $\epsilon_{\min}$ = minimum exploration probability
+- $t$ = current timestep
+
 
 `DecayEpsilonAgent` is similar to epsilon-greedy, but the exploration probability decreases over time.
 
@@ -172,6 +205,20 @@ If the agent explores, it chooses random available arms. If it exploits, it choo
 **AP:** This code duplicates some epsilon-greedy logic. It could be shared later if needed, but it is acceptable as-is for readability.
 
 ## `UCB1Agent`
+
+$$
+UCB_i =
+Q_i +
+c \sqrt{\frac{\ln t}{N_i}}
+$$
+
+where:
+
+- $UCB_i$ = UCB score of arm $i$
+- $Q_i$ = estimated reward of arm $i$
+- $c$ = exploration coefficient
+- $t$ = current timestep
+- $N_i$ = number of times arm $i$ has been selected
 
 `UCB1Agent` means Upper Confidence Bound.
 
@@ -227,6 +274,17 @@ This is needed because the UCB formula uses time in the exploration bonus.
 
 ## `ThompsonSamplingAgent`
 
+$$
+\theta_i \sim \mathrm{Beta}(\alpha_i,\beta_i)
+$$
+
+where:
+
+- $\theta_i$ = estimated success probability of arm $i$
+- $\alpha_i$ = success count + prior
+- $\beta_i$ = failure count + prior
+
+
 `ThompsonSamplingAgent` uses a beta distribution for each arm.
 
 Each arm starts with:
@@ -277,6 +335,19 @@ This updates the beta distribution for the selected arm.
 ## `SoftmaxAgent`
 
 `SoftmaxAgent` selects arms probabilistically based on current value estimates.
+
+$$
+P(a_i)=\frac{\exp(Q_i/\tau)}
+{\sum_{j=1}^{K}\exp(Q_j/\tau)}
+$$
+
+where:
+
+- $P(a_i)$ = probability of selecting arm $i$
+- $Q_i$ = estimated value (expected reward) of arm $i$
+- $K$ = number of available arms
+- $\tau$ = temperature parameter
+
 
 It has:
 
