@@ -154,6 +154,7 @@ The returned indices are converted back from local positions into real arm indic
 
 ## `DecayEpsilonAgent`
 
+
 $$
 \epsilon_t
 =
