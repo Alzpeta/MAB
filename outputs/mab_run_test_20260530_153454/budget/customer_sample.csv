@@ -1,0 +1,3 @@
+customer_id,restaurant_id,restaurant_name,restaurant_tier,requested_day,requested_hour,discount_affinity,time_flexibility,restaurant_loyalty,perk_affinity,urgency,group_size
+0,3,Kapustovy Dom,budget,3,19,0.30607550654098076,0.6146501853601722,0.5074298576630382,0.6324848979872473,0.515622409161208,2
+1,3,Kapustovy Dom,budget,3,22,0.7121399878652636,0.30735053543138563,0.2464698753232878,0.5082970719065887,0.3513964306188049,1

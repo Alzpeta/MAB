@@ -1,0 +1,7 @@
+scenario,option_category,shown_count,accepted_count,acceptance_rate
+budget,discount_only,83557.0,13388.0,0.16022595354069677
+budget,perk_only,102084.0,14745.0,0.14443987304572706
+budget,time_discount,49477.0,6021.0,0.12169290781575277
+budget,time_discount_perk,29834.0,3356.0,0.11248910638868405
+budget,time_only,37585.0,3411.0,0.09075429027537582
+budget,time_perk,57463.0,7054.0,0.12275725249290848
