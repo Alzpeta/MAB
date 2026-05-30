@@ -32,24 +32,12 @@ The current implementation keeps restaurant choice uniform. **AP:** I don't see 
 
 ## Requested Time
 
-Each customer receives:
+Each customer receives a requested day and hour sampled from weighted distributions:
 
-- `requested_day`: sampled uniformly from `0` to `CONFIG["N_DAYS"] - 1`.
-- `requested_hour`: sampled uniformly from `CONFIG["OPEN_HOUR"]` to `CONFIG["CLOSE_HOUR"] - 1`.
+- `requested_day` is drawn from `0` to `CONFIG["N_DAYS"] - 1` with weekend days weighted more heavily.
+- `requested_hour` is drawn from `CONFIG["OPEN_HOUR"]` to `CONFIG["CLOSE_HOUR"] - 1` with evening peak hours weighted more heavily.
 
-### Needs Update
-
-This is currently a weak point.
-
-The restaurant calendar generation assumes structured demand: evening hours are busier and weekend days are busier. However, customers are still generated with completely random requested days and hours. That means the model says restaurants are more occupied during peak periods, but customers do not actually arrive more often during those periods.
-
-This should probably be changed so requested time follows a non-uniform distribution, for example:
-
-- More customers request evening hours.
-- More customers request Friday and Saturday.
-- The requested-time distribution is aligned with `EVENING_PEAK_HOURS` and `WEEKEND_DAYS`.
-
-Without this, the occupancy model and customer arrival model are inconsistent.
+This keeps the customer arrival model aligned with the restaurant occupancy model. Peak days and peak hours now attract more requests, which matches the higher occupancy used in `source/restaurants.py`.
 
 ## Customer Attributes
 

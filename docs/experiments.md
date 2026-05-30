@@ -23,25 +23,11 @@ The module connects:
 
 In this context, one experiment means running one agent strategy through one generated customer sequence and returning the average reward.
 
-## `run_experiment`
+## `run_experiment_with_option_stats`
 
-`run_experiment(agent_class, k, restaurant_tiers=None)` runs one simulation for one agent class.
+`run_experiment_with_option_stats(agent_class, k, customers)` runs one simulation for one agent class using a pre-generated customer list.
 
-The function first creates restaurants:
-
-```python
-restaurants = generate_restaurants(restaurant_tiers)
-```
-
-If `restaurant_tiers` is provided, only restaurants from those tiers are generated. If it is `None`, all configured restaurants are used.
-
-Then it creates customers for those restaurants:
-
-```python
-customers = generate_customers(restaurants)
-```
-
-The customers are passed into the reservation environment:
+The function initializes the reservation environment directly from the provided `customers` list:
 
 ```python
 env = ReservationEnvironment(customers)
@@ -188,9 +174,7 @@ if result["done"]:
     break
 ```
 
-## `run_experiment_with_option_stats`
-
-`run_experiment_with_option_stats(agent_class, k, restaurant_tiers=None)` runs a similar simulation, but also tracks option-level statistics.
+`run_experiment_with_option_stats(agent_class, k, customers)` runs a similar simulation, but also tracks option-level statistics.
 
 It tracks:
 
