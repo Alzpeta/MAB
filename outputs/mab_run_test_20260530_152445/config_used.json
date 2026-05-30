@@ -1,16 +1,17 @@
 {
-  "run_name": "mab_run_20260530_120311",
+  "run_name": "mab_run_test_20260530_152445",
   "config_overrides": {
-    "N_CUSTOMERS": 100,
-    "N_RUNS": 100,
+    "N_CUSTOMERS": 2,
+    "N_RUNS": 2,
     "N_SHOWN_OPTIONS_LIST": [
       1,
       2
-    ]
+    ],
+    "SEED": 33
   },
   "config": {
-    "N_CUSTOMERS": 100,
-    "N_RUNS": 100,
+    "N_CUSTOMERS": 2,
+    "N_RUNS": 2,
     "SEED": 33,
     "N_SHOWN_OPTIONS_LIST": [
       1,

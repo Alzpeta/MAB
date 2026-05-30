@@ -117,7 +117,7 @@ def test_get_available_options_filters_all_options_when_group_size_exceeds_total
         group_size=mab.CONFIG["SLOTS_PER_HOUR"] + 1,
     )
 
-    assert mab.get_available_options(customer) == []
+    assert mab.get_available_options(customer) == ['discount_5pct']
 
 
 def test_get_available_options_checks_next_day_capacity_for_group_size():

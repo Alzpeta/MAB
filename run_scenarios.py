@@ -43,10 +43,10 @@ def configure_run():
     run_name = f"mab_run_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     config_overrides = {
 
-        # "N_CUSTOMERS": 2,
-        # "N_RUNS": 2,
-        # "N_SHOWN_OPTIONS_LIST": [1, 2],
-        # "SEED": 33,
+        "N_CUSTOMERS": 2,
+        "N_RUNS": 2,
+        "N_SHOWN_OPTIONS_LIST": [1, 2],
+        "SEED": 33,
     }
 
     scenarios = SCENARIOS
@@ -167,14 +167,162 @@ def restaurants_to_dataframe(restaurants):
     return pd.DataFrame(rows)
 
 
+# def run_scenario(scenario_name, restaurant_tiers):
+#     np.random.seed(CONFIG["SEED"])
+#
+#     # restaurants = generate_restaurants(restaurant_tiers)
+#     # customers = generate_customers(restaurants)
+#
+#     all_results = []
+#     all_option_results = []
+#
+#     for k in CONFIG["N_SHOWN_OPTIONS_LIST"]:
+#
+#         print("\n" + "=" * 60)
+#         print(f"SCENARIO = {scenario_name} | TOP-K = {k}")
+#         print("=" * 60)
+#
+#         topk_rows = []
+#
+#         for agent_name, agent_class in AGENTS.items():  # pro kazdeho agenta vezmu jeho jmeno a class
+#
+#             run_rewards = []
+#             run_option_results = []
+#             progress_label = (
+#                 f"{scenario_name} | top-k={k} | {agent_name:<20}"
+#             )
+#             progress_started_at = time.time()
+#
+#             for run in range(CONFIG["N_RUNS"]):
+#                 np.random.seed(CONFIG["SEED"] + run)
+#                 restaurants = generate_restaurants(restaurant_tiers)
+#                 customers = generate_customers(restaurants)
+#
+#                 if run == 0:
+#                     sample_restaurants = restaurants
+#                     sample_customers = customers
+#
+#
+#                 mean_reward, option_stats_df = run_experiment_with_option_stats(
+#                     agent_class,
+#                     k,
+#                     restaurants,
+#                     customers
+#                 )
+#
+#                 run_rewards.append(mean_reward)
+#                 option_stats_df["run"] = run
+#                 run_option_results.append(option_stats_df)
+#
+#                 print_progress(
+#                     progress_label,
+#                     run + 1,
+#                     CONFIG["N_RUNS"],
+#                     progress_started_at
+#                 )
+#
+#             option_results_df = pd.concat(
+#                 run_option_results,
+#                 ignore_index=True
+#             )
+#
+#             option_summary_df = (
+#                 option_results_df
+#                 .groupby(["option_name", "option_category"], as_index=False)
+#                 [["shown_count", "accepted_count"]]
+#                 .sum()
+#             )
+#             option_summary_df["acceptance_rate"] = (
+#                     option_summary_df["accepted_count"]
+#                     / option_summary_df["shown_count"]
+#             )
+#             option_summary_df["acceptance_rate"] = (
+#                 option_summary_df["acceptance_rate"]
+#                 .replace([np.inf, -np.inf], np.nan)
+#             )
+#             option_summary_df["scenario"] = scenario_name
+#             option_summary_df["restaurant_tiers"] = (
+#                 "all"
+#                 if restaurant_tiers is None
+#                 else ", ".join(restaurant_tiers)
+#             )
+#             option_summary_df["agent"] = agent_name
+#             option_summary_df["top_k"] = k
+#
+#             all_option_results.append(option_summary_df)
+#
+#             mean_reward = np.mean(run_rewards)
+#             std_reward = np.std(run_rewards)
+#
+#             row = {
+#                 "scenario": scenario_name,
+#                 "restaurant_tiers": (
+#                     "all"
+#                     if restaurant_tiers is None
+#                     else ", ".join(restaurant_tiers)
+#                 ),
+#                 "agent": agent_name,
+#                 "top_k": k,
+#                 "mean_reward": mean_reward,
+#                 "std_reward": std_reward,
+#                 "ci95": 1.96 * std_reward / np.sqrt(CONFIG["N_RUNS"]),
+#                 "min_reward": np.min(run_rewards),
+#                 "max_reward": np.max(run_rewards),
+#             }
+#
+#             topk_rows.append(row)
+#
+#         random_reward = next(
+#             row["mean_reward"]
+#             for row in topk_rows
+#             if row["agent"] == "Random"
+#         )
+#
+#         for row in topk_rows:
+#
+#             if random_reward == 0:
+#                 row["improvement_vs_random_pct"] = np.nan
+#             else:
+#                 row["improvement_vs_random_pct"] = (
+#                                                            (row["mean_reward"] - random_reward)
+#                                                            / random_reward
+#                                                    ) * 100
+#
+#         topk_rows = sorted(
+#             topk_rows,
+#             key=lambda x: x["mean_reward"],
+#             reverse=True
+#         )
+#
+#         for rank, row in enumerate(topk_rows, start=1):
+#             row["rank"] = rank
+#             all_results.append(row)
+#
+#             print(
+#                 f"{rank}. "
+#                 f"{row['agent']:<20}"
+#                 f"reward={row['mean_reward']:.4f} | "
+#                 f"std={row['std_reward']:.4f} | "
+#                 f"CI95=+/-{row['ci95']:.4f} | "
+#                 f"improvement={row['improvement_vs_random_pct']:+.2f}%"
+#             )
+#
+#     return (
+#         pd.DataFrame(all_results),
+#         pd.concat(all_option_results, ignore_index=True),
+#         restaurants_to_dataframe(sample_restaurants),
+#         customers_to_dataframe(sample_customers),
+#     )
+
+
 def run_scenario(scenario_name, restaurant_tiers):
-    np.random.seed(CONFIG["SEED"])
+    sample_restaurants = None
+    sample_customers = None
 
-    # restaurants = generate_restaurants(restaurant_tiers)
-    # customers = generate_customers(restaurants)
-
-    all_results = []
+    run_result_rows = []
     all_option_results = []
+
+    random_reward_by_k = {}
 
     for k in CONFIG["N_SHOWN_OPTIONS_LIST"]:
 
@@ -182,30 +330,60 @@ def run_scenario(scenario_name, restaurant_tiers):
         print(f"SCENARIO = {scenario_name} | TOP-K = {k}")
         print("=" * 60)
 
-        topk_rows = []
+        top_k_summary_rows = []
 
-        for agent_name, agent_class in AGENTS.items():  # pro kazdeho agenta vezmu jeho jmeno a class
+        for agent_name, agent_class in AGENTS.items():
 
             run_rewards = []
-            run_option_results = []
+            progress_started_at = time.time()
             progress_label = (
                 f"{scenario_name} | top-k={k} | {agent_name:<20}"
             )
-            progress_started_at = time.time()
 
             for run in range(CONFIG["N_RUNS"]):
                 np.random.seed(CONFIG["SEED"] + run)
+
+                restaurants = generate_restaurants(restaurant_tiers)
+                customers = generate_customers(restaurants)
+
+                if sample_restaurants is None:
+                    sample_restaurants = restaurants
+                    sample_customers = customers
+
+                np.random.seed(CONFIG["SEED"] + 10000 + run)
+
                 mean_reward, option_stats_df = run_experiment_with_option_stats(
                     agent_class,
                     k,
-                    # restaurants,
-                    # customers,
-                    restaurant_tiers=restaurant_tiers
+                    restaurants,
+                    customers
                 )
 
                 run_rewards.append(mean_reward)
+
+                run_result_rows.append({
+                    "scenario": scenario_name,
+                    "restaurant_tiers": (
+                        "all"
+                        if restaurant_tiers is None
+                        else ", ".join(restaurant_tiers)
+                    ),
+                    "agent": agent_name,
+                    "top_k": k,
+                    "run": run,
+                    "reward": mean_reward,
+                })
+
+                option_stats_df["scenario"] = scenario_name
+                option_stats_df["restaurant_tiers"] = (
+                    "all"
+                    if restaurant_tiers is None
+                    else ", ".join(restaurant_tiers)
+                )
+                option_stats_df["agent"] = agent_name
+                option_stats_df["top_k"] = k
                 option_stats_df["run"] = run
-                run_option_results.append(option_stats_df)
+                all_option_results.append(option_stats_df)
 
                 print_progress(
                     progress_label,
@@ -214,97 +392,168 @@ def run_scenario(scenario_name, restaurant_tiers):
                     progress_started_at
                 )
 
-            option_results_df = pd.concat(
-                run_option_results,
-                ignore_index=True
-            )
-
-            option_summary_df = (
-                option_results_df
-                .groupby(["option_name", "option_category"], as_index=False)
-                [["shown_count", "accepted_count"]]
-                .sum()
-            )
-            option_summary_df["acceptance_rate"] = (
-                    option_summary_df["accepted_count"]
-                    / option_summary_df["shown_count"]
-            )
-            option_summary_df["acceptance_rate"] = (
-                option_summary_df["acceptance_rate"]
-                .replace([np.inf, -np.inf], np.nan)
-            )
-            option_summary_df["scenario"] = scenario_name
-            option_summary_df["restaurant_tiers"] = (
-                "all"
-                if restaurant_tiers is None
-                else ", ".join(restaurant_tiers)
-            )
-            option_summary_df["agent"] = agent_name
-            option_summary_df["top_k"] = k
-
-            all_option_results.append(option_summary_df)
-
             mean_reward = np.mean(run_rewards)
             std_reward = np.std(run_rewards)
+            ci95 = 1.96 * std_reward / np.sqrt(CONFIG["N_RUNS"])
 
-            row = {
-                "scenario": scenario_name,
-                "restaurant_tiers": (
-                    "all"
-                    if restaurant_tiers is None
-                    else ", ".join(restaurant_tiers)
-                ),
+            if agent_name == "Random":
+                random_reward_by_k[k] = mean_reward
+
+            random_reward = random_reward_by_k.get(k)
+            if random_reward in (None, 0):
+                improvement = np.nan
+            else:
+                improvement = (
+                    (mean_reward - random_reward)
+                    / random_reward
+                ) * 100
+
+            print(
+                f"{agent_name:<20}"
+                f"reward={mean_reward:.4f} | "
+                f"std={std_reward:.4f} | "
+                f"CI95=+/-{ci95:.4f} | "
+                f"improvement={improvement:+.2f}%"
+            )
+
+            top_k_summary_rows.append({
                 "agent": agent_name,
-                "top_k": k,
                 "mean_reward": mean_reward,
                 "std_reward": std_reward,
-                "ci95": 1.96 * std_reward / np.sqrt(CONFIG["N_RUNS"]),
-                "min_reward": np.min(run_rewards),
-                "max_reward": np.max(run_rewards),
-            }
-
-            topk_rows.append(row)
+                "ci95": ci95,
+                "improvement_vs_random_pct": improvement,
+            })
 
         random_reward = next(
             row["mean_reward"]
-            for row in topk_rows
+            for row in top_k_summary_rows
             if row["agent"] == "Random"
         )
 
-        for row in topk_rows:
-
+        for row in top_k_summary_rows:
             if random_reward == 0:
                 row["improvement_vs_random_pct"] = np.nan
             else:
                 row["improvement_vs_random_pct"] = (
-                                                           (row["mean_reward"] - random_reward)
-                                                           / random_reward
-                                                   ) * 100
+                    (row["mean_reward"] - random_reward)
+                    / random_reward
+                ) * 100
 
-        topk_rows = sorted(
-            topk_rows,
-            key=lambda x: x["mean_reward"],
+        top_k_summary_rows = sorted(
+            top_k_summary_rows,
+            key=lambda row: row["mean_reward"],
             reverse=True
         )
 
-        for rank, row in enumerate(topk_rows, start=1):
-            row["rank"] = rank
-            all_results.append(row)
+        print("\nRANKING")
+        print(
+            f"{'rank':>4}  "
+            f"{'agent':<20}  "
+            f"{'reward':>8}  "
+            f"{'std':>8}  "
+            f"{'ci95':>8}  "
+            f"{'improvement':>12}"
+        )
+        print("-" * 70)
 
-            print(
-                f"{rank}. "
-                f"{row['agent']:<20}"
-                f"reward={row['mean_reward']:.4f} | "
-                f"std={row['std_reward']:.4f} | "
-                f"CI95=+/-{row['ci95']:.4f} | "
-                f"improvement={row['improvement_vs_random_pct']:+.2f}%"
+        for rank, row in enumerate(top_k_summary_rows, start=1):
+            improvement = row["improvement_vs_random_pct"]
+            improvement_text = (
+                ""
+                if pd.isna(improvement)
+                else f"{improvement:+.2f}%"
             )
 
+            print(
+                f"{rank:>4}  "
+                f"{row['agent']:<20}  "
+                f"{row['mean_reward']:>8.4f}  "
+                f"{row['std_reward']:>8.4f}  "
+                f"{row['ci95']:>8.4f}  "
+                f"{improvement_text:>12}"
+            )
+
+    run_results_df = pd.DataFrame(run_result_rows)
+
+    all_results = []
+
+    for (scenario, tiers, agent, top_k), group in run_results_df.groupby(
+        ["scenario", "restaurant_tiers", "agent", "top_k"]
+    ):
+        rewards = group["reward"]
+        all_results.append({
+            "scenario": scenario,
+            "restaurant_tiers": tiers,
+            "agent": agent,
+            "top_k": top_k,
+            "mean_reward": rewards.mean(),
+            "std_reward": rewards.std(ddof=0),
+            "ci95": 1.96 * rewards.std(ddof=0) / np.sqrt(CONFIG["N_RUNS"]),
+            "min_reward": rewards.min(),
+            "max_reward": rewards.max(),
+        })
+
+    results_df = pd.DataFrame(all_results)
+
+    random_rewards = (
+        results_df[results_df["agent"] == "Random"]
+        .set_index(["scenario", "restaurant_tiers", "top_k"])["mean_reward"]
+    )
+
+    for index, row in results_df.iterrows():
+        random_reward = random_rewards.loc[
+            (row["scenario"], row["restaurant_tiers"], row["top_k"])
+        ]
+        if random_reward == 0:
+            results_df.loc[index, "improvement_vs_random_pct"] = np.nan
+        else:
+            results_df.loc[index, "improvement_vs_random_pct"] = (
+                (row["mean_reward"] - random_reward)
+                / random_reward
+            ) * 100
+
+    results_df = results_df.sort_values(
+        ["scenario", "top_k", "mean_reward"],
+        ascending=[True, True, False]
+    )
+    results_df["rank"] = (
+        results_df
+        .groupby(["scenario", "top_k"])
+        .cumcount()
+        + 1
+    )
+
+    option_results_df = pd.concat(all_option_results, ignore_index=True)
+    option_summary_df = (
+        option_results_df
+        .groupby(
+            [
+                "scenario",
+                "restaurant_tiers",
+                "agent",
+                "top_k",
+                "option_name",
+                "option_category",
+            ],
+            as_index=False
+        )
+        [["shown_count", "accepted_count"]]
+        .sum()
+    )
+    option_summary_df["acceptance_rate"] = (
+        option_summary_df["accepted_count"]
+        / option_summary_df["shown_count"]
+    )
+    option_summary_df["acceptance_rate"] = (
+        option_summary_df["acceptance_rate"]
+        .replace([np.inf, -np.inf], np.nan)
+    )
+
     return (
-        pd.DataFrame(all_results),
-        pd.concat(all_option_results, ignore_index=True),
-        restaurants_to_dataframe(restaurants),
-        customers_to_dataframe(customers),
+        results_df,
+        option_summary_df,
+        restaurants_to_dataframe(sample_restaurants),
+        customers_to_dataframe(sample_customers),
     )
 
 

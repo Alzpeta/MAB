@@ -6,66 +6,66 @@ from .options import N_ARMS, OPTION_NAMES, option_category
 import numpy as np
 import pandas as pd
 
-def run_experiment(agent_class, k, restaurant_tiers=None):
+# def run_experiment(agent_class, k, restaurant_tiers=None):
+#
+#     restaurants = generate_restaurants(restaurant_tiers)
+#
+#     customers = generate_customers(restaurants)
+#
+#     env = ReservationEnvironment(customers)
+#
+#     agent = agent_class(N_ARMS)
+#
+#     rewards = []
+#
+#     env.reset()
+#
+#     while True:
+#
+#         customer = env.get_customer()
+#
+#         available_options = get_available_options(
+#             customer
+#         )
+#
+#         available_indices = option_names_to_indices(
+#             available_options
+#         )
+#
+#         if len(available_indices) == 0:
+#
+#             displayed_arms = np.array([])
+#
+#         else:
+#
+#             displayed_arms = agent.select_arms(
+#                 available_indices,
+#                 k
+#             )
+#
+#         result = env.step(displayed_arms)
+#
+#         reward = result["reward"]
+#
+#         rewards.append(reward)
+#
+#         if result["chosen_arm"] is not None:
+#
+#             agent.update(
+#                 result["chosen_arm"],
+#                 reward
+#             )
+#
+#         if result["done"]:
+#             break
+#
+#     return np.mean(rewards)
+#
 
-    restaurants = generate_restaurants(restaurant_tiers)
+def run_experiment_with_option_stats(agent_class, k, restaurants, customers):
 
-    customers = generate_customers(restaurants)
-
-    env = ReservationEnvironment(customers)
-
-    agent = agent_class(N_ARMS)
-
-    rewards = []
-
-    env.reset()
-
-    while True:
-
-        customer = env.get_customer()
-
-        available_options = get_available_options(
-            customer
-        )
-
-        available_indices = option_names_to_indices(
-            available_options
-        )
-
-        if len(available_indices) == 0:
-
-            displayed_arms = np.array([])
-
-        else:
-
-            displayed_arms = agent.select_arms(
-                available_indices,
-                k
-            )
-
-        result = env.step(displayed_arms)
-
-        reward = result["reward"]
-
-        rewards.append(reward)
-
-        if result["chosen_arm"] is not None:
-
-            agent.update(
-                result["chosen_arm"],
-                reward
-            )
-
-        if result["done"]:
-            break
-
-    return np.mean(rewards)
-
-
-def run_experiment_with_option_stats(agent_class, k, restaurant_tiers=None):
-
-    restaurants = generate_restaurants(restaurant_tiers)
-    customers = generate_customers(restaurants)
+    # restaurants = generate_restaurants(restaurant_tiers)
+    # customers = generate_customers(restaurants)
     env = ReservationEnvironment(customers)
     agent = agent_class(N_ARMS)
 
@@ -93,6 +93,9 @@ def run_experiment_with_option_stats(agent_class, k, restaurant_tiers=None):
         result = env.step(displayed_arms)
         reward = result["reward"]
         rewards.append(reward)
+
+        if result["chosen_arm"] is not None:
+            accepted_counts[result["chosen_arm"]] += 1
 
         for arm in displayed_arms:
             reward_for_arm = int(arm == result["chosen_arm"])

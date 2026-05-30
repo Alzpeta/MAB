@@ -1,7 +1,0 @@
-scenario,option_category,shown_count,accepted_count,acceptance_rate
-budget,discount_only,15.0,0.0,0.0
-budget,perk_only,14.0,0.0,0.0
-budget,time_discount,8.0,0.0,0.0
-budget,time_discount_perk,14.0,0.0,0.0
-budget,time_only,6.0,0.0,0.0
-budget,time_perk,15.0,0.0,0.0
