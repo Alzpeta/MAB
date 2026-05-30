@@ -132,25 +132,24 @@ This is the average acceptance reward across all customers in the run.
 
 ## Agent Update
 
-The agent is updated only when the customer accepted an arm:
+The agent is updated for displayed arms after each customer interaction:
 
 ```python
-if result["chosen_arm"] is not None:
-    agent.update(
-        result["chosen_arm"],
-        reward
-    )
+for arm in displayed_arms:
+    if result["chosen_arm"] is None:
+        agent.update(arm, 0)
+    elif arm == result["chosen_arm"]:
+        agent.update(arm, 1)
+        break
+    else:
+        agent.update(arm, 0)
 ```
 
-This means rejected interactions do not currently update the selected displayed arms unless the environment returns a chosen arm.
+If a customer rejects all displayed options, every displayed arm receives an update with reward `0`.
 
-### Needs Decision
+If a customer accepts an option, displayed arms before the accepted option receive reward `0`, the accepted arm receives reward `1`, and the update loop stops.
 
-This is an important modeling detail.
-
-If a customer rejects all displayed options, the current code records reward `0`, but it does not update the agent for the displayed arms. This means the agent learns directly from accepted arms, but not directly from rejected shown arms.
-
-This happens in `source/experiment.py` inside both experiment loops:
+This happens in `source/experiment.py`:
 
 ```python
 result = env.step(displayed_arms)
@@ -159,14 +158,17 @@ reward = result["reward"]
 
 rewards.append(reward)
 
-if result["chosen_arm"] is not None:
-    agent.update(
-        result["chosen_arm"],
-        reward
-    )
+for arm in displayed_arms:
+    if result["chosen_arm"] is None:
+        agent.update(arm, 0)
+    elif arm == result["chosen_arm"]:
+        agent.update(arm, 1)
+        break
+    else:
+        agent.update(arm, 0)
 ```
 
-The reward is always appended to the experiment-level results, but `agent.update(...)` only runs when `chosen_arm` is not `None`.
+The reward is always appended to the experiment-level results. Agent learning is based on the displayed arms and the first accepted arm, if any.
 
 The related return value comes from `source/reservation.py`. If the customer does not accept any displayed option, `customer_choice` returns:
 
@@ -174,7 +176,7 @@ The related return value comes from `source/reservation.py`. If the customer doe
 return None, 0
 ```
 
-So a full rejection becomes `chosen_arm = None` and `reward = 0`. The `0` is counted in the experiment average, but no displayed arm receives an update with that `0`.
+So a full rejection becomes `chosen_arm = None` and `reward = 0`. The `0` is counted in the experiment average and is also used to update all displayed arms.
 
 
 ## Done Condition
@@ -219,13 +221,9 @@ When a customer accepts an arm, the function increments:
 accepted_counts[result["chosen_arm"]] += 1
 ```
 
-Then it updates the agent:
+The agent update itself is handled by the displayed-arm update loop described above.
 
-```python
-agent.update(result["chosen_arm"], reward)
-```
-
-So the accepted option contributes both to the option statistics and to the agent's learning.
+So the accepted option contributes both to the option statistics and to the agent's learning, while rejected displayed options contribute negative feedback.
 
 ## Option Statistics Output
 

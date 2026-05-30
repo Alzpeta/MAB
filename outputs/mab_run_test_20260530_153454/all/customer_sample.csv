@@ -1,3 +1,0 @@
-customer_id,restaurant_id,restaurant_name,restaurant_tier,requested_day,requested_hour,discount_affinity,time_flexibility,restaurant_loyalty,perk_affinity,urgency,group_size
-0,5,Zlaty Rezen,midrange,0,13,0.7079751870626271,0.7485298279721737,0.8233537019533814,0.6629601645017366,0.0,7
-1,5,Zlaty Rezen,midrange,5,16,0.6538249937607546,0.8319511998205736,0.727645881042471,0.6158512948719823,0.14118411851491874,7
