@@ -1,3 +1,5 @@
+import argparse
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 import json
@@ -11,6 +13,8 @@ from source.agents import AGENTS
 from source.experiment import run_experiment_with_option_stats
 from source.options import ALL_OPTIONS
 from source.config import CONFIG
+
+DEFAULT_CONFIG = deepcopy(CONFIG)
 
 Path("outputs/matplotlib_cache").mkdir(parents=True, exist_ok=True)
 os.environ.setdefault(
@@ -38,17 +42,92 @@ SCENARIOS = {
     "premium": ["premium"],
 }
 
+DEFAULT_RUN_CONFIG_OVERRIDES = {
+    "N_CUSTOMERS": 20000,
+    "N_RUNS": 100,
+    "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    "SEED": 33,
+}
+
+REQUESTED_EXPERIMENTS = [
+    # {
+    #     "name": "baseline",
+    #     "description": "Use the default configuration.",
+    #     "config_overrides": {},
+    # },
+    {
+        "name": "higher_occupancy",
+        "description": "Increase TIER_BASE_OCCUPANCY.",
+        "config_overrides": {
+            "TIER_BASE_OCCUPANCY": {
+                "budget": 0.60,
+                "midrange": 0.75,
+                "premium": 0.90,
+            },
+        },
+    },
+    {
+        "name": "lower_occupancy",
+        "description": "Decrease TIER_BASE_OCCUPANCY.",
+        "config_overrides": {
+            "TIER_BASE_OCCUPANCY": {
+                "budget": 0.30,
+                "midrange": 0.45,
+                "premium": 0.60,
+            },
+        },
+    },
+    {
+        "name": "more_optimistic_initial_estimate",
+        "description": "Increase INITIAL_ACCEPTANCE_ESTIMATE.",
+        "config_overrides": {
+            "INITIAL_ACCEPTANCE_ESTIMATE": 0.55,
+        },
+    },
+    {
+        "name": "more_positive_customer_mood",
+        "description": "Increase BASE_UTILITY.",
+        "config_overrides": {
+            "BASE_UTILITY": 0,
+        },
+    },
+    {
+        "name": "noisy_reward_environment",
+        "description": "Increase observation noise in outcomes.",
+        "config_overrides": {
+            "NOISE_STD": 1,
+        },
+    },
+    {
+        "name": "extended_operating_hours",
+        "description": "Expand the daily opening window.",
+        "config_overrides": {
+            "OPEN_HOUR": 13,
+            "CLOSE_HOUR": 21,
+        },
+    },
+]
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Run reservation MAB scenarios."
+    )
+    parser.add_argument(
+        "--requested-experiments",
+        action="store_true",
+        help=(
+            "Run all requested experiments from docs/experiments.md "
+            "one after another."
+        ),
+    )
+
+    return parser.parse_args()
+
 
 def configure_run():
-    run_name = f"mab_run_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-    config_overrides = {
-
-        "N_CUSTOMERS": 2000,
-        "N_RUNS": 10,
-        "N_SHOWN_OPTIONS_LIST": [1, 2],
-        "SEED": 33,
-    }
-
+    run_name = f"mab_run_init_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    config_overrides = deepcopy(DEFAULT_RUN_CONFIG_OVERRIDES)
     scenarios = SCENARIOS
 
     return run_name, config_overrides, scenarios
@@ -69,6 +148,11 @@ def apply_config_overrides(config_overrides):
 
     CONFIG.update(config_overrides)
     np.random.seed(CONFIG["SEED"])
+
+
+def reset_config():
+    CONFIG.clear()
+    CONFIG.update(deepcopy(DEFAULT_CONFIG))
 
 
 def format_duration(seconds):
@@ -409,9 +493,16 @@ def run_scenario(scenario_name, restaurant_tiers):
     )
 
 
-def save_config(output_dir, run_name, config_overrides, scenarios):
+def save_config(
+    output_dir,
+    run_name,
+    config_overrides,
+    scenarios,
+    experiment=None
+):
     config_output = {
         "run_name": run_name,
+        "experiment": experiment,
         "config_overrides": config_overrides,
         "config": CONFIG,
         "scenarios": scenarios,
@@ -794,12 +885,22 @@ def plot_overall_result_heatmap(all_results_df, output_dir):
     )
 
 
-def main():
-    run_name, config_overrides, scenarios = configure_run()
+def run_configured_scenarios(
+    run_name,
+    config_overrides,
+    scenarios,
+    experiment=None
+):
+    reset_config()
     apply_config_overrides(config_overrides)
-
     output_dir = make_output_dir(run_name)
-    save_config(output_dir, run_name, config_overrides, scenarios)
+    save_config(
+        output_dir,
+        run_name,
+        config_overrides,
+        scenarios,
+        experiment
+    )
 
     scenario_results = []
     scenario_option_results = []
@@ -920,6 +1021,65 @@ def main():
 
     print("\nDONE")
     print(f"Outputs saved to: {output_dir.resolve()}")
+
+    return output_dir
+
+
+def requested_experiment_runs():
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    for experiment in REQUESTED_EXPERIMENTS:
+        config_overrides = deepcopy(DEFAULT_RUN_CONFIG_OVERRIDES)
+        config_overrides.update(deepcopy(experiment["config_overrides"]))
+
+        yield {
+            "run_name": (
+                f"mab_requested_experiments_"
+                f"{timestamp}_{experiment['name']}"
+            ),
+            "experiment": experiment,
+            "config_overrides": config_overrides,
+            "scenarios": SCENARIOS,
+        }
+
+
+def run_requested_experiments():
+    runs = list(requested_experiment_runs())
+    output_dirs = []
+
+    for index, run in enumerate(runs, start=1):
+        experiment = run["experiment"]
+
+        print("\n" + "#" * 72)
+        print(
+            f"REQUESTED EXPERIMENT {index}/{len(runs)}: "
+            f"{experiment['name']}"
+        )
+        print(experiment["description"])
+        print("#" * 72)
+
+        output_dir = run_configured_scenarios(
+            run["run_name"],
+            run["config_overrides"],
+            run["scenarios"],
+            experiment,
+        )
+        output_dirs.append(output_dir)
+
+    print("\nALL REQUESTED EXPERIMENTS DONE")
+    for output_dir in output_dirs:
+        print(f"- {output_dir.resolve()}")
+
+
+def main():
+    args = parse_args()
+
+    if args.requested_experiments:
+        run_requested_experiments()
+        return
+
+    run_name, config_overrides, scenarios = configure_run()
+    run_configured_scenarios(run_name, config_overrides, scenarios)
 
 
 if __name__ == "__main__":

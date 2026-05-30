@@ -7,15 +7,15 @@
 | Lower occupancy | Decrease `TIER_BASE_OCCUPANCY`. | `TIER_BASE_OCCUPANCY` |
 | More optimistic initial estimate | Increase `INITIAL_ACCEPTANCE_ESTIMATE`. | `INITIAL_ACCEPTANCE_ESTIMATE` |
 | More positive customer mood | Increase `BASE_UTILITY`. | `BASE_UTILITY` |
-| Discount-seeking customers | Increase discount affinity and reduce perk affinity. | `DISCOUNT_AFFINITY_MEAN`, `PERK_AFFINITY_MEAN` |
-| Perk-driven customers | Increase perk affinity and reduce discount affinity. | `PERK_AFFINITY_MEAN`, `DISCOUNT_AFFINITY_MEAN` |
-| Time-inflexible customers | Reduce time flexibility and optionally tighten spread. | `TIME_FLEXIBILITY_MEAN`, `TIME_FLEXIBILITY_STD` |
-| High-urgency customers | Increase urgency and optionally tighten spread. | `URGENCY_MEAN`, `URGENCY_STD` |
-| Peak season - full house | Increase baseline occupancy toward full capacity. | `TIER_BASE_OCCUPANCY` |
 | Noisy reward environment | Increase observation noise in outcomes. | `NOISE_STD` |
-| High-loyalty customer base | Increase loyalty and adjust loyalty spread. | `LOYALTY_MEAN`, `LOYALTY_STD` |
 | Extended operating hours | Expand the daily opening window. | `OPEN_HOUR`, `CLOSE_HOUR` |
-| Perks outweigh discounts | Shift reward composition toward perks over discounts. | `DISCOUNT_WEIGHT`, `PERK_WEIGHT` |
+
+Higher occupancy = {"budget": 0.60, "midrange": 0.75, "premium": 0.90}
+Lower occupancy = {"budget": 0.30, "midrange": 0.45, "premium": 0.60}
+More optimistic initial estimate  = 0.55
+More positive customer mood = 0
+Noisy reward environment = 1
+Extended operating hours = OPEN_HOUR =13 CLOSE_HOUR=21
 
 ## Experiment Runner
 
