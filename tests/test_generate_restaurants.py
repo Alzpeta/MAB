@@ -5,7 +5,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import mab
+import source.restaurants as mab
 
 
 def setup_function():
@@ -61,7 +61,7 @@ def test_generate_all_restaurants_with_expected_structure():
 
     print_restaurant_calendar_summary(restaurants)
 
-    assert len(restaurants) == mab.CONFIG["N_RESTAURANTS"]
+    assert len(restaurants) == 15
 
     for restaurant in restaurants:
         config = mab.RESTAURANT_CONFIGS[restaurant["restaurant_id"]]

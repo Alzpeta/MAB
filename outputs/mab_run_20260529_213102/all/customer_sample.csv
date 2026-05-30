@@ -1,0 +1,3 @@
+customer_id,restaurant_id,restaurant_name,restaurant_tier,requested_day,requested_hour,discount_affinity,time_flexibility,restaurant_loyalty,perk_affinity,urgency,group_size
+0,5,Zlaty Rezen,midrange,0,16,0.5869291932312879,0.6478862849107592,0.6911478177048963,0.2582711328540335,0.4228406969110984,3
+1,9,Mastny Obrus,midrange,0,19,0.8088052058027091,0.2930172290728306,0.38633937214601904,0.4873373806283353,0.5424304904141072,4

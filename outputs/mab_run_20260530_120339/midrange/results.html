@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Results - midrange</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 24px;
+      color: #222;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    table.results-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+    }
+    .results-table th {
+      background: #263238;
+      color: white;
+      padding: 8px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+    .results-table td {
+      border-bottom: 1px solid #ddd;
+      padding: 7px 8px;
+      white-space: nowrap;
+    }
+    .results-table tr:nth-child(even) {
+      background: #f6f8fa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Results - midrange</h1>
+  <table border="1" class="dataframe results-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>scenario</th>
+      <th>restaurant_tiers</th>
+      <th>agent</th>
+      <th>top_k</th>
+      <th>mean_reward</th>
+      <th>std_reward</th>
+      <th>ci95</th>
+      <th>min_reward</th>
+      <th>max_reward</th>
+      <th>improvement_vs_random_pct</th>
+      <th>rank</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>DecayEpsilon</td>
+      <td>1</td>
+      <td>0.1400</td>
+      <td>0.0091</td>
+      <td>0.0057</td>
+      <td>0.1230</td>
+      <td>0.1520</td>
+      <td>19.8630</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>UCB1</td>
+      <td>1</td>
+      <td>0.1341</td>
+      <td>0.0088</td>
+      <td>0.0054</td>
+      <td>0.1160</td>
+      <td>0.1530</td>
+      <td>14.8116</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Softmax</td>
+      <td>1</td>
+      <td>0.1307</td>
+      <td>0.0094</td>
+      <td>0.0058</td>
+      <td>0.1120</td>
+      <td>0.1470</td>
+      <td>11.9007</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>EpsilonGreedy</td>
+      <td>1</td>
+      <td>0.1299</td>
+      <td>0.0091</td>
+      <td>0.0056</td>
+      <td>0.1190</td>
+      <td>0.1510</td>
+      <td>11.2158</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Thompson</td>
+      <td>1</td>
+      <td>0.1285</td>
+      <td>0.0064</td>
+      <td>0.0040</td>
+      <td>0.1160</td>
+      <td>0.1380</td>
+      <td>10.0171</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Random</td>
+      <td>1</td>
+      <td>0.1168</td>
+      <td>0.0075</td>
+      <td>0.0047</td>
+      <td>0.1090</td>
+      <td>0.1330</td>
+      <td>0.0000</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>EpsilonGreedy</td>
+      <td>2</td>
+      <td>0.2581</td>
+      <td>0.0126</td>
+      <td>0.0078</td>
+      <td>0.2400</td>
+      <td>0.2750</td>
+      <td>13.9011</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>DecayEpsilon</td>
+      <td>2</td>
+      <td>0.2532</td>
+      <td>0.0126</td>
+      <td>0.0078</td>
+      <td>0.2340</td>
+      <td>0.2800</td>
+      <td>11.7387</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Thompson</td>
+      <td>2</td>
+      <td>0.2521</td>
+      <td>0.0138</td>
+      <td>0.0085</td>
+      <td>0.2330</td>
+      <td>0.2740</td>
+      <td>11.2533</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>UCB1</td>
+      <td>2</td>
+      <td>0.2356</td>
+      <td>0.0196</td>
+      <td>0.0122</td>
+      <td>0.1980</td>
+      <td>0.2770</td>
+      <td>3.9718</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Softmax</td>
+      <td>2</td>
+      <td>0.2344</td>
+      <td>0.0126</td>
+      <td>0.0078</td>
+      <td>0.2090</td>
+      <td>0.2540</td>
+      <td>3.4422</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Random</td>
+      <td>2</td>
+      <td>0.2266</td>
+      <td>0.0149</td>
+      <td>0.0093</td>
+      <td>0.2060</td>
+      <td>0.2550</td>
+      <td>0.0000</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>

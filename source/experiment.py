@@ -94,9 +94,9 @@ def run_experiment_with_option_stats(agent_class, k, restaurant_tiers=None):
         reward = result["reward"]
         rewards.append(reward)
 
-        if result["chosen_arm"] is not None:
-            accepted_counts[result["chosen_arm"]] += 1
-            agent.update(result["chosen_arm"], reward)
+        for arm in displayed_arms:
+            reward_for_arm = int(arm == result["chosen_arm"])
+            agent.update(arm, reward_for_arm)
 
         if result["done"]:
             break

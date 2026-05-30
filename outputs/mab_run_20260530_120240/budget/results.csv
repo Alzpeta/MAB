@@ -1,0 +1,13 @@
+scenario,restaurant_tiers,agent,top_k,mean_reward,std_reward,ci95,min_reward,max_reward,improvement_vs_random_pct,rank
+budget,budget,Thompson,1,0.5,0.5,0.6929646455628166,0.0,1.0,100.0,1
+budget,budget,Random,1,0.25,0.25,0.3464823227814083,0.0,0.5,0.0,2
+budget,budget,Softmax,1,0.25,0.25,0.3464823227814083,0.0,0.5,0.0,3
+budget,budget,EpsilonGreedy,1,0.0,0.0,0.0,0.0,0.0,-100.0,4
+budget,budget,DecayEpsilon,1,0.0,0.0,0.0,0.0,0.0,-100.0,5
+budget,budget,UCB1,1,0.0,0.0,0.0,0.0,0.0,-100.0,6
+budget,budget,UCB1,2,0.5,0.0,0.0,0.5,0.5,,1
+budget,budget,Softmax,2,0.5,0.0,0.0,0.5,0.5,,2
+budget,budget,Thompson,2,0.25,0.25,0.3464823227814083,0.0,0.5,,3
+budget,budget,Random,2,0.0,0.0,0.0,0.0,0.0,,4
+budget,budget,EpsilonGreedy,2,0.0,0.0,0.0,0.0,0.0,,5
+budget,budget,DecayEpsilon,2,0.0,0.0,0.0,0.0,0.0,,6

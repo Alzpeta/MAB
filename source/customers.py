@@ -9,6 +9,15 @@ def generate_customers(restaurants):
 
         restaurant = np.random.choice(restaurants)
 
+        day_weights = np.ones(CONFIG["N_DAYS"])
+        day_weights[CONFIG["WEEKEND_DAYS"]] += CONFIG["WEEKEND_OCCUPANCY_BOOST"]
+        day_probabilities = day_weights / day_weights.sum()
+
+        hours = np.arange(CONFIG["OPEN_HOUR"], CONFIG["CLOSE_HOUR"])
+        hour_weights = np.ones(len(hours))
+        hour_weights[np.isin(hours, CONFIG["EVENING_PEAK_HOURS"])] += CONFIG["EVENING_OCCUPANCY_BOOST"]
+        hour_probabilities = hour_weights / hour_weights.sum()
+
         customer = {
 
             "customer_id": customer_id,
@@ -18,12 +27,15 @@ def generate_customers(restaurants):
             "restaurant_id": restaurant["restaurant_id"],
 
             "requested_day":
-                np.random.randint(0, CONFIG["N_DAYS"]),
+                np.random.choice(
+                    np.arange(CONFIG["N_DAYS"]),
+                    p=day_probabilities
+                ),
 
             "requested_hour":
-                np.random.randint(
-                    CONFIG["OPEN_HOUR"],
-                    CONFIG["CLOSE_HOUR"]
+                np.random.choice(
+                    hours,
+                    p=hour_probabilities
                 ),
 
             "discount_affinity":

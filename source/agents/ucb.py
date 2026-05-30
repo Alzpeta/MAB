@@ -56,10 +56,7 @@ class UCB1Agent(BaseAgent):
                 best_local = np.argsort(
                     remaining_scores
                 )[-remaining_needed:]
-                #todo
-                # chosen.extend(
-                #     list(remaining[best_local])
-                # )
+
                 chosen.extend(
                     list(remaining[best_local][::-1])
                 )

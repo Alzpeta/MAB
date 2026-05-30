@@ -32,6 +32,7 @@ import pandas as pd
 
 SCENARIOS = {
     "all": None,
+    # "pro-plebs": ["budget","midrange"],
     "budget": ["budget"],
     "midrange": ["midrange"],
     "premium": ["premium"],
@@ -39,12 +40,12 @@ SCENARIOS = {
 
 
 def configure_run():
-    run_name = f"mab_run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    run_name = f"mab_run_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     config_overrides = {
 
-        # "N_CUSTOMERS": 5000,
-        # "N_RUNS": 5,
-        # "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+        # "N_CUSTOMERS": 2,
+        # "N_RUNS": 2,
+        # "N_SHOWN_OPTIONS_LIST": [1, 2],
         # "SEED": 33,
     }
 
@@ -169,11 +170,8 @@ def restaurants_to_dataframe(restaurants):
 def run_scenario(scenario_name, restaurant_tiers):
     np.random.seed(CONFIG["SEED"])
 
-    restaurants = generate_restaurants(restaurant_tiers)
-    customers = generate_customers(restaurants)
-
-    np.random.seed(CONFIG["SEED"])  # hmm tohle by se nemelo teda nastavovat pred kazdym runem. je to safe?
-    # todo:check ve dvou runech ze se to chova jinak
+    # restaurants = generate_restaurants(restaurant_tiers)
+    # customers = generate_customers(restaurants)
 
     all_results = []
     all_option_results = []
@@ -195,11 +193,13 @@ def run_scenario(scenario_name, restaurant_tiers):
             )
             progress_started_at = time.time()
 
-            for run in range(CONFIG["N_RUNS"]):  # a jedeme jednotlive runy
-
+            for run in range(CONFIG["N_RUNS"]):
+                np.random.seed(CONFIG["SEED"] + run)
                 mean_reward, option_stats_df = run_experiment_with_option_stats(
                     agent_class,
                     k,
+                    # restaurants,
+                    # customers,
                     restaurant_tiers=restaurant_tiers
                 )
 

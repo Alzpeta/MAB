@@ -34,7 +34,7 @@ class DecayEpsilonAgent(BaseAgent):
     def __init__(
         self,
         n_arms,
-        epsilon_0=1.0,
+        epsilon_0=0.1,
         min_epsilon=0.01
     ):
 

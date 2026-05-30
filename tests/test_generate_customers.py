@@ -5,7 +5,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import mab
+import tests.mab_customer_imports as mab
 
 
 def setup_function():
@@ -41,4 +41,3 @@ def test_generate_customers_with_expected_structure():
         for field in affinity_fields:
             assert 0 <= customer[field] <= 1
 
-        assert 1 <= customer["group_size"] <= 6

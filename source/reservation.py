@@ -34,7 +34,7 @@ def get_available_options(customer):
                     group_size
                 ):
                     continue
-        else:
+        elif time_shift > 0:
 
             future_hour = hour + time_shift
 

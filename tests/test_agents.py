@@ -5,7 +5,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import mab
+import tests.mab_agents_imports as mab
 
 
 def test_base_agent_update_tracks_counts_and_incremental_average():
@@ -83,7 +83,7 @@ def test_epsilon_greedy_agent_explores_when_random_value_is_below_epsilon(
 def test_decay_epsilon_agent_increments_time_and_exploits_when_not_exploring(
     monkeypatch,
 ):
-    agent = mab.DecayEpsilonAgent(n_arms=5, epsilon_0=1, min_epsilon=0.01)
+    agent = mab.DecayEpsilonAgent(n_arms=5)
     agent.values = np.array([0.1, 0.8, 0.4, 0.9, 0.2])
     agent.t = 10000
     available_indices = np.array([0, 1, 2, 4])
@@ -108,7 +108,7 @@ def test_ucb1_agent_prioritizes_unexplored_available_arms():
 
 
 def test_ucb1_agent_uses_scores_for_remaining_slots_after_unexplored_arms():
-    agent = mab.UCB1Agent(n_arms=5, c=0)
+    agent = mab.UCB1Agent(n_arms=5)
     agent.counts = np.array([3, 0, 2, 5, 1])
     agent.values = np.array([0.3, 0.1, 0.9, 0.5, 0.2])
     available_indices = np.array([0, 1, 2, 3])
@@ -122,6 +122,10 @@ def test_thompson_sampling_agent_update_adjusts_alpha_and_beta():
     agent = mab.ThompsonSamplingAgent(n_arms=3)
 
     agent.update(arm=1, reward=1)
+
+    assert agent.alpha.tolist() == [1, 2, 1]
+    assert agent.beta.tolist() == [1, 1, 1]
+
     agent.update(arm=1, reward=0)
 
     assert agent.alpha.tolist() == [1, 2, 1]
@@ -149,7 +153,7 @@ def test_softmax_agent_selects_with_probabilities_from_available_values(
     monkeypatch,
 ):
     agent = mab.SoftmaxAgent(n_arms=4, temperature=1)
-    agent.values = np.array([1.0, 2.0, 3.0, 4.0])
+    agent.values = np.array([0.1, 0.2, 0.3, 0.4])
     available_indices = np.array([0, 2, 3])
     captured = {}
 

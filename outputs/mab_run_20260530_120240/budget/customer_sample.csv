@@ -1,0 +1,3 @@
+customer_id,restaurant_id,restaurant_name,restaurant_tier,requested_day,requested_hour,discount_affinity,time_flexibility,restaurant_loyalty,perk_affinity,urgency,group_size
+0,3,Kapustovy Dom,budget,4,19,0.7748772049748457,0.7133890960278338,0.7118563556937959,0.5141160100633984,0.0,2
+1,2,Treska & Sen,budget,3,19,0.5786881788600846,0.5075612036244409,0.6111605261294142,0.38220289357756165,1.0,5

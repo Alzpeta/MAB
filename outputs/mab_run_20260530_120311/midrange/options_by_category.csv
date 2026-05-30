@@ -1,0 +1,7 @@
+scenario,option_category,shown_count,accepted_count,acceptance_rate
+midrange,discount_only,25773.0,0.0,0.0
+midrange,perk_only,38911.0,0.0,0.0
+midrange,time_discount,18609.0,0.0,0.0
+midrange,time_discount_perk,32335.0,0.0,0.0
+midrange,time_only,23920.0,0.0,0.0
+midrange,time_perk,37452.0,0.0,0.0

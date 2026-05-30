@@ -2,7 +2,7 @@ CONFIG = {
 
     "N_CUSTOMERS": 20000,
 
-    "N_RUNS": 30,
+    "N_RUNS": 100,
 
     "SEED": 33,
 

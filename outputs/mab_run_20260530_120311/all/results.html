@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Results - all</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 24px;
+      color: #222;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    table.results-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+    }
+    .results-table th {
+      background: #263238;
+      color: white;
+      padding: 8px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+    .results-table td {
+      border-bottom: 1px solid #ddd;
+      padding: 7px 8px;
+      white-space: nowrap;
+    }
+    .results-table tr:nth-child(even) {
+      background: #f6f8fa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Results - all</h1>
+  <table border="1" class="dataframe results-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>scenario</th>
+      <th>restaurant_tiers</th>
+      <th>agent</th>
+      <th>top_k</th>
+      <th>mean_reward</th>
+      <th>std_reward</th>
+      <th>ci95</th>
+      <th>min_reward</th>
+      <th>max_reward</th>
+      <th>improvement_vs_random_pct</th>
+      <th>rank</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>UCB1</td>
+      <td>1</td>
+      <td>0.1243</td>
+      <td>0.0346</td>
+      <td>0.0068</td>
+      <td>0.0300</td>
+      <td>0.2400</td>
+      <td>1.4694</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Thompson</td>
+      <td>1</td>
+      <td>0.1239</td>
+      <td>0.0324</td>
+      <td>0.0064</td>
+      <td>0.0600</td>
+      <td>0.2000</td>
+      <td>1.1429</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Softmax</td>
+      <td>1</td>
+      <td>0.1231</td>
+      <td>0.0369</td>
+      <td>0.0072</td>
+      <td>0.0500</td>
+      <td>0.2100</td>
+      <td>0.4898</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Random</td>
+      <td>1</td>
+      <td>0.1225</td>
+      <td>0.0311</td>
+      <td>0.0061</td>
+      <td>0.0700</td>
+      <td>0.2300</td>
+      <td>0.0000</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>DecayEpsilon</td>
+      <td>1</td>
+      <td>0.1224</td>
+      <td>0.0344</td>
+      <td>0.0068</td>
+      <td>0.0600</td>
+      <td>0.2200</td>
+      <td>-0.0816</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>EpsilonGreedy</td>
+      <td>1</td>
+      <td>0.1205</td>
+      <td>0.0381</td>
+      <td>0.0075</td>
+      <td>0.0400</td>
+      <td>0.2200</td>
+      <td>-1.6327</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Softmax</td>
+      <td>2</td>
+      <td>0.2328</td>
+      <td>0.0445</td>
+      <td>0.0087</td>
+      <td>0.1400</td>
+      <td>0.3800</td>
+      <td>6.4472</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>UCB1</td>
+      <td>2</td>
+      <td>0.2273</td>
+      <td>0.0447</td>
+      <td>0.0088</td>
+      <td>0.1400</td>
+      <td>0.3500</td>
+      <td>3.9323</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>DecayEpsilon</td>
+      <td>2</td>
+      <td>0.2268</td>
+      <td>0.0423</td>
+      <td>0.0083</td>
+      <td>0.1300</td>
+      <td>0.3400</td>
+      <td>3.7037</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Thompson</td>
+      <td>2</td>
+      <td>0.2260</td>
+      <td>0.0424</td>
+      <td>0.0083</td>
+      <td>0.1200</td>
+      <td>0.3400</td>
+      <td>3.3379</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>EpsilonGreedy</td>
+      <td>2</td>
+      <td>0.2248</td>
+      <td>0.0377</td>
+      <td>0.0074</td>
+      <td>0.1100</td>
+      <td>0.3200</td>
+      <td>2.7892</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Random</td>
+      <td>2</td>
+      <td>0.2187</td>
+      <td>0.0360</td>
+      <td>0.0070</td>
+      <td>0.1300</td>
+      <td>0.3300</td>
+      <td>0.0000</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
