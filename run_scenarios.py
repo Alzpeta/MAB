@@ -36,10 +36,9 @@ import pandas as pd
 
 SCENARIOS = {
     "all": None,
-    # "pro-plebs": ["budget","midrange"],
-    "budget": ["budget"],
-    "midrange": ["midrange"],
-    "premium": ["premium"],
+    # "budget": ["budget"],
+    # "midrange": ["midrange"],
+    # "premium": ["premium"],
 }
 
 DEFAULT_RUN_CONFIG_OVERRIDES = {
@@ -51,61 +50,75 @@ DEFAULT_RUN_CONFIG_OVERRIDES = {
 
 REQUESTED_EXPERIMENTS = [
     # {
-    #     "name": "baseline",
+    #     "name": "more-k",
     #     "description": "Use the default configuration.",
     #     "config_overrides": {},
     # },
+    # {
+    #     "name": "much_higher_occupancy",
+    #     "description": "Increase TIER_BASE_OCCUPANCY.",
+    #     "config_overrides": {
+    #         "TIER_BASE_OCCUPANCY": {
+    #             "budget": 0.75,
+    #             "midrange": 0.90,
+    #             "premium": 0.98,
+    #         },
+    #     },
+    # },
+    # {
+    #     "name": "much_lower_occupancy",
+    #     "description": "Decrease TIER_BASE_OCCUPANCY.",
+    #     "config_overrides": {
+    #         "TIER_BASE_OCCUPANCY": {
+    #             "budget": 0.15,
+    #             "midrange": 0.30,
+    #             "premium": 0.45,
+    #         },
+    #     },
+    # },
+    # {
+    #     "name": "more_optimistic_initial_estimate",
+    #     "description": "Increase INITIAL_ACCEPTANCE_ESTIMATE.",
+    #     "config_overrides": {
+    #         "INITIAL_ACCEPTANCE_ESTIMATE": 0.55,
+    #     },
+    # },
     {
-        "name": "higher_occupancy",
-        "description": "Increase TIER_BASE_OCCUPANCY.",
+        "name": "2.5_customer_mood",
+        "description": "decrese BASE_UTILITY.",
         "config_overrides": {
-            "TIER_BASE_OCCUPANCY": {
-                "budget": 0.60,
-                "midrange": 0.75,
-                "premium": 0.90,
-            },
+            "BASE_UTILITY": -2.5,
         },
     },
     {
-        "name": "lower_occupancy",
-        "description": "Decrease TIER_BASE_OCCUPANCY.",
+        "name": "1_customer_mood",
+        "description": "incresed BASE_UTILITY.",
         "config_overrides": {
-            "TIER_BASE_OCCUPANCY": {
-                "budget": 0.30,
-                "midrange": 0.45,
-                "premium": 0.60,
-            },
+            "BASE_UTILITY": -1,
         },
     },
-    {
-        "name": "more_optimistic_initial_estimate",
-        "description": "Increase INITIAL_ACCEPTANCE_ESTIMATE.",
-        "config_overrides": {
-            "INITIAL_ACCEPTANCE_ESTIMATE": 0.55,
-        },
-    },
-    {
-        "name": "more_positive_customer_mood",
-        "description": "Increase BASE_UTILITY.",
-        "config_overrides": {
-            "BASE_UTILITY": 0,
-        },
-    },
-    {
-        "name": "noisy_reward_environment",
-        "description": "Increase observation noise in outcomes.",
-        "config_overrides": {
-            "NOISE_STD": 1,
-        },
-    },
-    {
-        "name": "extended_operating_hours",
-        "description": "Expand the daily opening window.",
-        "config_overrides": {
-            "OPEN_HOUR": 13,
-            "CLOSE_HOUR": 21,
-        },
-    },
+    # {
+    #     "name": "very_low_noise_environment",
+    #     "description": "Increase observation noise in outcomes.",
+    #     "config_overrides": {
+    #         "NOISE_STD": 0.1,
+    #     },
+    # },
+    # {
+    #     "name": "low_noise_environment",
+    #     "description": "Increase observation noise in outcomes.",
+    #     "config_overrides": {
+    #         "NOISE_STD": 0.3,
+    #     },
+    # },
+    # {
+    #     "name": "much_extended_operating_hours",
+    #     "description": "Expand the daily opening window.",
+    #     "config_overrides": {
+    #         "OPEN_HOUR": 9,
+    #         "CLOSE_HOUR": 24,
+    #     },
+    # },
 ]
 
 

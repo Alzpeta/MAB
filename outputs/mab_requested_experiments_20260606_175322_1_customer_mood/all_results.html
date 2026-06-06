@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>All scenario results</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 24px;
+      color: #222;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    table.results-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+    }
+    .results-table th {
+      background: #263238;
+      color: white;
+      padding: 8px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+    .results-table td {
+      border-bottom: 1px solid #ddd;
+      padding: 7px 8px;
+      white-space: nowrap;
+    }
+    .results-table tr:nth-child(even) {
+      background: #f6f8fa;
+    }
+  </style>
+</head>
+<body>
+  <h1>All scenario results</h1>
+  <table border="1" class="dataframe results-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>scenario</th>
+      <th>restaurant_tiers</th>
+      <th>agent</th>
+      <th>top_k</th>
+      <th>mean_reward</th>
+      <th>std_reward</th>
+      <th>ci95</th>
+      <th>min_reward</th>
+      <th>max_reward</th>
+      <th>improvement_vs_random_pct</th>
+      <th>rank</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>DecayEpsilon</td>
+      <td>1</td>
+      <td>0.3210</td>
+      <td>0.0039</td>
+      <td>0.0008</td>
+      <td>0.3099</td>
+      <td>0.3300</td>
+      <td>18.6018</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>EpsilonGreedy</td>
+      <td>1</td>
+      <td>0.3179</td>
+      <td>0.0044</td>
+      <td>0.0009</td>
+      <td>0.3037</td>
+      <td>0.3272</td>
+      <td>17.4317</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Thompson</td>
+      <td>1</td>
+      <td>0.3162</td>
+      <td>0.0038</td>
+      <td>0.0008</td>
+      <td>0.3032</td>
+      <td>0.3253</td>
+      <td>16.8214</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Softmax</td>
+      <td>1</td>
+      <td>0.3065</td>
+      <td>0.0037</td>
+      <td>0.0007</td>
+      <td>0.2991</td>
+      <td>0.3164</td>
+      <td>13.2267</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>UCB1</td>
+      <td>1</td>
+      <td>0.3022</td>
+      <td>0.0035</td>
+      <td>0.0007</td>
+      <td>0.2943</td>
+      <td>0.3105</td>
+      <td>11.6458</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Random</td>
+      <td>1</td>
+      <td>0.2707</td>
+      <td>0.0029</td>
+      <td>0.0006</td>
+      <td>0.2630</td>
+      <td>0.2781</td>
+      <td>0.0000</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>DecayEpsilon</td>
+      <td>2</td>
+      <td>0.5383</td>
+      <td>0.0039</td>
+      <td>0.0008</td>
+      <td>0.5279</td>
+      <td>0.5479</td>
+      <td>14.8443</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Thompson</td>
+      <td>2</td>
+      <td>0.5334</td>
+      <td>0.0039</td>
+      <td>0.0008</td>
+      <td>0.5192</td>
+      <td>0.5433</td>
+      <td>13.8058</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>EpsilonGreedy</td>
+      <td>2</td>
+      <td>0.5314</td>
+      <td>0.0037</td>
+      <td>0.0007</td>
+      <td>0.5208</td>
+      <td>0.5408</td>
+      <td>13.3748</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Softmax</td>
+      <td>2</td>
+      <td>0.5176</td>
+      <td>0.0045</td>
+      <td>0.0009</td>
+      <td>0.5051</td>
+      <td>0.5295</td>
+      <td>10.4273</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>UCB1</td>
+      <td>2</td>
+      <td>0.5162</td>
+      <td>0.0037</td>
+      <td>0.0007</td>
+      <td>0.5050</td>
+      <td>0.5232</td>
+      <td>10.1391</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Random</td>
+      <td>2</td>
+      <td>0.4687</td>
+      <td>0.0033</td>
+      <td>0.0007</td>
+      <td>0.4615</td>
+      <td>0.4791</td>
+      <td>0.0000</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>DecayEpsilon</td>
+      <td>3</td>
+      <td>0.6656</td>
+      <td>0.0039</td>
+      <td>0.0008</td>
+      <td>0.6552</td>
+      <td>0.6736</td>
+      <td>9.3101</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Thompson</td>
+      <td>3</td>
+      <td>0.6634</td>
+      <td>0.0035</td>
+      <td>0.0007</td>
+      <td>0.6546</td>
+      <td>0.6712</td>
+      <td>8.9470</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>EpsilonGreedy</td>
+      <td>3</td>
+      <td>0.6599</td>
+      <td>0.0037</td>
+      <td>0.0007</td>
+      <td>0.6482</td>
+      <td>0.6694</td>
+      <td>8.3652</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>UCB1</td>
+      <td>3</td>
+      <td>0.6539</td>
+      <td>0.0034</td>
+      <td>0.0007</td>
+      <td>0.6434</td>
+      <td>0.6611</td>
+      <td>7.3812</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Softmax</td>
+      <td>3</td>
+      <td>0.6510</td>
+      <td>0.0035</td>
+      <td>0.0007</td>
+      <td>0.6418</td>
+      <td>0.6602</td>
+      <td>6.9113</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>all</td>
+      <td>Random</td>
+      <td>3</td>
+      <td>0.6089</td>
+      <td>0.0034</td>
+      <td>0.0007</td>
+      <td>0.5993</td>
+      <td>0.6189</td>
+      <td>0.0000</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
