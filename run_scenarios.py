@@ -44,81 +44,129 @@ SCENARIOS = {
 DEFAULT_RUN_CONFIG_OVERRIDES = {
     "N_CUSTOMERS": 20000,
     "N_RUNS": 100,
-    "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    "N_SHOWN_OPTIONS_LIST": [1, 2, 3, 4, 5, 6, 7],
     "SEED": 33,
 }
 
 REQUESTED_EXPERIMENTS = [
-    # {
-    #     "name": "more-k",
-    #     "description": "Use the default configuration.",
-    #     "config_overrides": {},
-    # },
-    # {
-    #     "name": "much_higher_occupancy",
-    #     "description": "Increase TIER_BASE_OCCUPANCY.",
-    #     "config_overrides": {
-    #         "TIER_BASE_OCCUPANCY": {
-    #             "budget": 0.75,
-    #             "midrange": 0.90,
-    #             "premium": 0.98,
-    #         },
-    #     },
-    # },
-    # {
-    #     "name": "much_lower_occupancy",
-    #     "description": "Decrease TIER_BASE_OCCUPANCY.",
-    #     "config_overrides": {
-    #         "TIER_BASE_OCCUPANCY": {
-    #             "budget": 0.15,
-    #             "midrange": 0.30,
-    #             "premium": 0.45,
-    #         },
-    #     },
-    # },
-    # {
-    #     "name": "more_optimistic_initial_estimate",
-    #     "description": "Increase INITIAL_ACCEPTANCE_ESTIMATE.",
-    #     "config_overrides": {
-    #         "INITIAL_ACCEPTANCE_ESTIMATE": 0.55,
-    #     },
-    # },
     {
-        "name": "2.5_customer_mood",
-        "description": "decrese BASE_UTILITY.",
+        "name": "baseline",
+        "description": "Baseline configuration; evaluate k from 1 to 7.",
+        "config_overrides": {},
+    },
+    {
+        "name": "extended_operating_hours",
+        "description": "Extend opening hours from 11:00-23:00 to 09:00-24:00.",
         "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+            "OPEN_HOUR": 9,
+            "CLOSE_HOUR": 24,
+        },
+    },
+    {
+        "name": "much_lower_occupancy",
+        "description": "Use the Much Lower occupancy scenario from the paper.",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1],
+            "TIER_BASE_OCCUPANCY": {
+                "budget": 0.15,
+                "midrange": 0.30,
+                "premium": 0.45,
+            },
+        },
+    },
+    {
+        "name": "lower_occupancy",
+        "description": "Use the Lower occupancy scenario from the paper.",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1],
+            "TIER_BASE_OCCUPANCY": {
+                "budget": 0.30,
+                "midrange": 0.45,
+                "premium": 0.60,
+            },
+        },
+    },
+    {
+        "name": "higher_occupancy",
+        "description": "Use the Higher occupancy scenario from the paper.",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1],
+            "TIER_BASE_OCCUPANCY": {
+                "budget": 0.60,
+                "midrange": 0.75,
+                "premium": 0.90,
+            },
+        },
+    },
+    {
+        "name": "much_higher_occupancy",
+        "description": "Use the Much Higher occupancy scenario from the paper.",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1],
+            "TIER_BASE_OCCUPANCY": {
+                "budget": 0.75,
+                "midrange": 0.90,
+                "premium": 0.98,
+            },
+        },
+    },
+    {
+        "name": "low_decision_uncertainty",
+        "description": "Use low decision uncertainty (sigma = 0.1).",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+            "NOISE_STD": 0.1,
+        },
+    },
+    {
+        "name": "high_decision_uncertainty",
+        "description": "Use high decision uncertainty (sigma = 1.0).",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+            "NOISE_STD": 1.0,
+        },
+    },
+    {
+        "name": "very_high_decision_uncertainty",
+        "description": "Use very high decision uncertainty (sigma = 1.5).",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+            "NOISE_STD": 1.5,
+        },
+    },
+    {
+        "name": "very_pessimistic_customer_attitude",
+        "description": "Use very pessimistic customer attitude (U0 = -3.5).",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+            "BASE_UTILITY": -3.5,
+        },
+    },
+    {
+        "name": "pessimistic_customer_attitude",
+        "description": "Use pessimistic customer attitude (U0 = -2.5).",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
             "BASE_UTILITY": -2.5,
         },
     },
     {
-        "name": "1_customer_mood",
-        "description": "incresed BASE_UTILITY.",
+        "name": "optimistic_customer_attitude",
+        "description": "Use optimistic customer attitude (U0 = -1.0).",
         "config_overrides": {
-            "BASE_UTILITY": -1,
+            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+            "BASE_UTILITY": -1.0,
         },
     },
-    # {
-    #     "name": "very_low_noise_environment",
-    #     "description": "Increase observation noise in outcomes.",
-    #     "config_overrides": {
-    #         "NOISE_STD": 0.1,
-    #     },
-    # },
-    # {
-    #     "name": "low_noise_environment",
-    #     "description": "Increase observation noise in outcomes.",
-    #     "config_overrides": {
-    #         "NOISE_STD": 0.3,
-    #     },
-    # },
-    # {
-    #     "name": "much_extended_operating_hours",
-    #     "description": "Expand the daily opening window.",
-    #     "config_overrides": {
-    #         "OPEN_HOUR": 9,
-    #         "CLOSE_HOUR": 24,
-    #     },
-    # },
+    {
+        "name": "very_optimistic_customer_attitude",
+        "description": "Use very optimistic customer attitude (U0 = 0.0).",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+            "BASE_UTILITY": 0.0,
+        },
+    },
 ]
 
 
