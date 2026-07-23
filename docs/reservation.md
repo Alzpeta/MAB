@@ -35,8 +35,6 @@ time_shift = int(np.ceil(arm["time_shift"] / 60))
 
 Options with minute-level shifts are effectively rounded up to whole hours. For example, a hypothetical 45-minute delay would be treated as a one-hour delay.
 
-**AP:** Options like `+45min` would not make much sense in this part of the model right now, because availability is checked only at the hourly level.
-
 ## Same-Day Options
 
 For same-day options, the function computes:
@@ -66,8 +64,6 @@ hour
 This is safe because the original requested hour already had to be within opening hours. Therefore, the same hour on the next day should also be within opening hours.
 
 
-**AP:** The calendar should handle the case where someone requests a reservation on the last simulated day and receives a next-day option, so the index does not overflow.
-
 The current restaurant generation handles this by adding one extra day that repeats day `0`:
 
 ```python
@@ -78,11 +74,7 @@ So if `N_DAYS == 7`, day `7` exists as a repeated version of day `0`.
 
 ## Availability Risk
 
-There is an open question about what should happen when the system wants to show more options than are available.
-
 For example, an experiment might ask the agent to show five options, but capacity and opening-hour checks may leave only three valid options.
-
-**AP:** This can definitely happen. We should decide whether this is a problem.
 
 The current code simply returns the available options it finds. The later environment behavior depends on what the agent ultimately displays.
 
@@ -119,8 +111,6 @@ The model therefore normalizes the shift:
 ```python
 normalized_shift = arm["time_shift"] / CONFIG["TIME_SHIFT_NORMALIZER"]
 ```
-
-**AP:** Without this normalization, time shift would be on a completely different scale than the other utility terms and would dominate the model. The probability would be heavily biased toward rejection.
 
 Currently, `TIME_SHIFT_NORMALIZER` is one full day in minutes.
 
@@ -175,8 +165,6 @@ Urgency creates another delay penalty:
 ```python
 customer["urgency"] * (-normalized_shift) * CONFIG["URGENCY_DELAY_WEIGHT"]
 ```
-
-**AP:** This is somewhat redundant with time flexibility, but it is acceptable because flexibility and urgency represent different things.
 
 ### Perks
 
@@ -234,8 +222,6 @@ np.clip(
 
 This prevents the model from saying that an option is literally impossible or guaranteed.
 
-**AP:** This is another protection against determinism. Even a bad offer can sometimes work, because customer behavior is not perfectly predictable.
-
 ## `ReservationEnvironment`
 
 `ReservationEnvironment` is the simulation environment used by the agents.
@@ -279,15 +265,7 @@ None, 0
 
 This means no arm was accepted and the reward is zero.
 
-### Empty Displayed Options
-
-There is an open modeling question here.
-
-**AP:** If the system displays no options, are we telling the bandit that it failed and should receive reward `0`? Or should this customer be skipped instead?
-
 The current implementation treats this as a failed interaction with reward `0`.
-
-**AP:** I would just skip it and not return 0 to agent. But maybe this actually doesn't do anything?? we have to check it
 
 ## Acceptance Draw
 
@@ -340,4 +318,3 @@ The returned dictionary has this shape:
 ```
 
 `done` becomes `True` when the environment has processed all generated customers.
-

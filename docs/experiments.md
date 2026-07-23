@@ -1,21 +1,100 @@
-# Requested Experiments
+# Experimental Scenarios Used in the Paper
 
-| Experiment | Configuration change | ExperimentConfig keys used |
-| --- | --- | --- |
-| Baseline run | Use the default configuration. | None (default values). |
-| Higher occupancy | Increase `TIER_BASE_OCCUPANCY`. | `TIER_BASE_OCCUPANCY` |
-| Lower occupancy | Decrease `TIER_BASE_OCCUPANCY`. | `TIER_BASE_OCCUPANCY` |
-| More optimistic initial estimate | Increase `INITIAL_ACCEPTANCE_ESTIMATE`. | `INITIAL_ACCEPTANCE_ESTIMATE` |
-| More positive customer mood | Increase `BASE_UTILITY`. | `BASE_UTILITY` |
-| Noisy reward environment | Increase observation noise in outcomes. | `NOISE_STD` |
-| Extended operating hours | Expand the daily opening window. | `OPEN_HOUR`, `CLOSE_HOUR` |
+Only the scenarios listed below are used in the paper and configured in
+`run_scenarios.py`.
 
-Higher occupancy = {"budget": 0.60, "midrange": 0.75, "premium": 0.90}
-Lower occupancy = {"budget": 0.30, "midrange": 0.45, "premium": 0.60}
-More optimistic initial estimate  = 0.55
-More positive customer mood = 0
-Noisy reward environment = 1
-Extended operating hours = OPEN_HOUR =13 CLOSE_HOUR=21
+All experiments use:
+
+- 20,000 customers per simulation run
+- 100 independent simulation runs
+- random seed 33
+- all restaurant tiers together
+
+## Baseline
+
+The baseline uses the default model configuration:
+
+| Parameter | Baseline value |
+| --- | --- |
+| Opening hours | 11:00–23:00 |
+| Budget occupancy | 0.45 |
+| Mid-range occupancy | 0.60 |
+| Premium occupancy | 0.75 |
+| Decision uncertainty (`NOISE_STD`) | 0.6 |
+| Customer attitude (`BASE_UTILITY`) | -2.0 |
+| Initial value estimate | 0.15 |
+| Evaluated values of `k` | 1, 2, 3, 4, 5, 6, 7 |
+
+The complete baseline output is stored in:
+
+`mab_requested_experiments_20260604_140307_more-k`
+
+Despite the `more-k` suffix, this is the complete baseline experiment. It
+contains all results for `k = 1–7`.
+
+The older folder `mab_requested_experiments_20260530_173123_baseline` contains
+only `k = 1–3`. Those results are duplicated in the complete `more-k` folder,
+so the older folder is not needed.
+
+## Extended Opening Hours
+
+| Scenario | Opening hours | Evaluated values of `k` | Output folder |
+| --- | --- | --- | --- |
+| Baseline | 11:00–23:00 | 1, 2, 3 | Baseline `more-k` folder |
+| Extended | 09:00–24:00 | 1, 2, 3 | `mab_requested_experiments_20260604_205405_much_extended_operating_hours` |
+
+The older `extended_operating_hours` output with opening hours 13:00–21:00
+does not match the scenario in the paper and is not used.
+
+## Restaurant Occupancy
+
+The occupancy comparison is evaluated for `k = 1`.
+
+| Scenario | Budget | Mid-range | Premium | Output folder |
+| --- | ---: | ---: | ---: | --- |
+| Much Lower | 0.15 | 0.30 | 0.45 | `mab_requested_experiments_20260604_205405_much_lower_occupancy` |
+| Lower | 0.30 | 0.45 | 0.60 | `mab_requested_experiments_20260530_200921_lower_occupancy` |
+| Baseline | 0.45 | 0.60 | 0.75 | Baseline `more-k` folder |
+| Higher | 0.60 | 0.75 | 0.90 | `mab_requested_experiments_20260530_200921_higher_occupancy` |
+| Much Higher | 0.75 | 0.90 | 0.98 | `mab_requested_experiments_20260604_205405_much_higher_occupancy` |
+
+## Decision Uncertainty
+
+Decision uncertainty is controlled by `NOISE_STD` and evaluated for
+`k = 1, 2, 3`.
+
+| Scenario | `NOISE_STD` | Output folder |
+| --- | ---: | --- |
+| Low | 0.1 | `mab_requested_experiments_20260606_121238_very_low_noise_environment` |
+| Baseline | 0.6 | Baseline `more-k` folder |
+| High | 1.0 | `mab_requested_experiments_20260530_200921_noisy_reward_environment` |
+| Very High | 1.5 | `mab_requested_experiments_20260604_205405_much_noisier_reward_environment` |
+
+The output with `NOISE_STD = 0.3` is not part of the scenarios evaluated in
+the paper.
+
+## Customer Attitude
+
+Customer attitude is controlled by `BASE_UTILITY` and evaluated for
+`k = 1, 2, 3`.
+
+| Scenario | `BASE_UTILITY` | Output folder |
+| --- | ---: | --- |
+| Very Pessimistic | -3.5 | `mab_requested_experiments_20260604_205405_very_pesimistic_customer_mood` |
+| Pessimistic | -2.5 | `mab_requested_experiments_20260606_175322_2.5_customer_mood` |
+| Baseline | -2.0 | Baseline `more-k` folder |
+| Optimistic | -1.0 | `mab_requested_experiments_20260606_175322_1_customer_mood` |
+| Very Optimistic | 0.0 | `mab_requested_experiments_20260530_200921_more_positive_customer_mood` |
+
+## Running All Paper Scenarios
+
+Run:
+
+```bash
+python run_scenarios.py --requested-experiments
+```
+
+This executes the baseline and every non-baseline scenario listed above.
 
 ## Experiment Runner
 
@@ -246,18 +325,6 @@ np.mean(rewards), pd.DataFrame(option_rows)
 
 So the output is the average reward plus a dataframe with option-level performance.
 
-## Fairness Between Agents
-
-The problem is whether different agents may receive different generated options because of randomness.
-
-### Needs Decision
-
-If each agent gets separately generated restaurants, customers, or availability conditions, then comparison between agents may include random environment differences.
-
-For a stricter comparison, all agents in the same scenario should probably share the same generated restaurants and customers, or use controlled seeds.
-
-The current function generates restaurants and customers inside each experiment call, so this should be checked when comparing strategies.
-
 ## Empty Available Options
 
 Both experiment functions handle zero available options by displaying an empty array.
@@ -266,8 +333,4 @@ Both experiment functions handle zero available options by displaying an empty a
 displayed_arms = np.array([])
 ```
 
-### Needs Decision
-
 This case is connected to the reservation environment behavior. If no options are displayed, the environment returns no chosen arm and reward `0`.
-
-We should decide whether this should count as a failed interaction, or whether the customer should be skipped because the agent had no valid action.

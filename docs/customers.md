@@ -24,11 +24,8 @@ restaurant = np.random.choice(restaurants)
 
 This means every restaurant in the active experiment has the same probability of receiving a customer.
 
-### Needs Update Or Decision
-
-Premium restaurants currently have higher base occupancy, so there is a modeling question: should more customers also try to visit them, or should customer demand stay uniformly distributed across restaurants?
-
-The current implementation keeps restaurant choice uniform. **AP:** I don't see it as a problem. I would keep it as it is... 
+The current implementation keeps restaurant choice uniform even though
+premium restaurants have higher base occupancy.
 
 ## Requested Time
 

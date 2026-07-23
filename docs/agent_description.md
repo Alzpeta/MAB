@@ -106,9 +106,6 @@ np.random.choice(
 
 This agent does not use learned values when selecting arms. It is used as a baseline.
 
-**AP:** If there are fewer available options than `k`, the agent simply returns fewer options. If there are zero available options, it would return zero, but in practice each restaurant should have at least some non-time-dependent options.
-**AP:** So maybe the discussion about "no available options" is not needed, because it can never happend...
-
 ## `EpsilonGreedyAgent`
 
 $$
@@ -149,8 +146,6 @@ return available_indices[best_local][::-1]
 ```
 
 The returned indices are converted back from local positions into real arm indices.
-
-**AP:** Outside tests, `epsilon` is currently treated as a standard fixed value and is not changed.
 
 ## `DecayEpsilonAgent`
 
@@ -202,8 +197,6 @@ Then `self.t` is incremented.
 This means exploration decreases as `t` grows, but it never goes below `min_epsilon`.
 
 If the agent explores, it chooses random available arms. If it exploits, it chooses the available arms with the highest current values, the same way as `EpsilonGreedyAgent`.
-
-**AP:** This code duplicates some epsilon-greedy logic. It could be shared later if needed, but it is acceptable as-is for readability.
 
 ## `UCB1Agent`
 
@@ -263,15 +256,11 @@ ucb_scores = self.values.copy()
 
 This avoids modifying the stored value estimates while calculating temporary selection scores.
 
-**AP:** The formula is (probably) correct conceptually, but the code is not very readable.
-
 ## UCB Time Step
 
 `UCB1Agent` has its own `self.t`.
 
 This is needed because the UCB formula uses time in the exploration bonus.
-
-**AP:** Strategies that depend on `t` may be sensitive to how many customers are in the simulation. This may be worth checking in experiments.
 
 ## `ThompsonSamplingAgent`
 
@@ -330,8 +319,6 @@ self.beta[arm] += 1 - reward
 If the reward is `1`, alpha increases. If the reward is `0`, beta increases.
 
 This updates the beta distribution for the selected arm.
-
-**AP:** This update path should be checked through a scenario run, because it does not use the base class update logic.
 
 ## `SoftmaxAgent`
 
@@ -412,4 +399,3 @@ Therefore, agents are not only choosing which options to show. They are also inf
 | `UCB1Agent` | Add uncertainty bonus to value estimates | Tries unexplored or underexplored arms |
 | `ThompsonSamplingAgent` | Sample from beta distributions | Exploration happens through posterior sampling |
 | `SoftmaxAgent` | Sample according to softmax probabilities | Lower-value arms can still be sampled |
-

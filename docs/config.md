@@ -8,13 +8,11 @@ The main configuration is stored in `source/config.py` in the `CONFIG` dictionar
 
 - Default value: `20000`
 - Number of customers in one simulation run.
-- **AP:** I would not increase this indefinitely - this is a cold-start system, so this seems reasonably fair.
 
 #### `N_RUNS`
 
 - Default value: `100`
 - Number of repeated runs for each strategy.
-- **AP:** Lets make sure that seed is not set before each run, so they are actually different...
 
 #### `SEED`
 
@@ -60,7 +58,6 @@ The main configuration is stored in `source/config.py` in the `CONFIG` dictionar
 
 - Default value: `0.20`
 - Occupancy increase during the evening peak.
-- **AP:** This was changed from 0.35, because then it was always full. With this it is reasonable. 
 
 #### `WEEKEND_DAYS`
 
@@ -71,13 +68,11 @@ The main configuration is stored in `source/config.py` in the `CONFIG` dictionar
 
 - Default value: `0.15`
 - Occupancy increase during weekend days.
-- **AP:** This was changed from 0.20, because then it was always full. With this it is reasonable. 
 
 #### `TIER_BASE_OCCUPANCY`
 
 - Default value: `{"budget": 0.45, "midrange": 0.60, "premium": 0.75}`
 - Base occupancy by restaurant tier.
-- **AP:** I want to work with this in one of the scenarios. Less and more people. This I would keep as default.
 
 ## Bandit
 
@@ -85,7 +80,6 @@ The main configuration is stored in `source/config.py` in the `CONFIG` dictionar
 
 - Default value: `0.15`
 - Initial acceptance rate/reward estimate for each arm.
-- **AP:** This number could be actually very problematic. The first accepted option increase to 0.85 which is then much bigger then the rest. this will not affect Thompson, this could be the reason why it is winning... Maybe 0.5?
 
 ## Customer Distributions
 
@@ -93,7 +87,6 @@ The main configuration is stored in `source/config.py` in the `CONFIG` dictionar
 
 - Default value: `0.5`
 - Mean customer sensitivity to discounts.
-- **AP:** i would not change any of those. Seems reasonable. People are generated based on the normal distribution
 
 #### `DISCOUNT_AFFINITY_STD`
 
@@ -147,7 +140,6 @@ The main configuration is stored in `source/config.py` in the `CONFIG` dictionar
 - Default value: `-2.0`
 - Default utility before offer and customer attributes are applied.
 - Customers are generally expected to be reluctant, because they entered the system after their original request could not be fulfilled, so they are less likely to accept an alternative.
-- **AP:** Would try to change this in some of the experiments
 
 #### `DISCOUNT_WEIGHT`
 

@@ -38,8 +38,6 @@ Some combinations are still valid even when one attribute is better than another
 Discount-only options with different discount values should not appear together for the same restaurant, because the larger discount is always better under the current representation.
 
 Perks have fixed `perk_value` scores, but customers may still have different preferences. Technically the perks can be ranked by value, but their interpretation is more subjective than discount or delay.
-**AP:*** we can discuss this
-
 ## Option Usage Across Restaurants
 
 The table below shows how many restaurant configurations include each option.
