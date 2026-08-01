@@ -112,11 +112,19 @@ REQUESTED_EXPERIMENTS = [
         },
     },
     {
-        "name": "low_decision_uncertainty",
+        "name": "very_low_decision_uncertainty",
         "description": "Use low decision uncertainty (sigma = 0.1).",
         "config_overrides": {
             "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
             "NOISE_STD": 0.1,
+        },
+    },
+    {
+        "name": "low_decision_uncertainty",
+        "description": "Use low decision uncertainty (sigma = 0.1).",
+        "config_overrides": {
+            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+            "NOISE_STD": 0.3,
         },
     },
     {
