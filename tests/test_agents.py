@@ -52,6 +52,18 @@ def test_random_agent_does_not_request_more_arms_than_available(monkeypatch):
     assert selected.tolist() == [2, 1]
 
 
+def test_fixed_order_policy_selects_first_available_arms_without_learning():
+    policy = mab.FixedOrderPolicy(n_arms=5)
+    available_indices = np.array([4, 1, 3])
+
+    assert policy.select_arms(available_indices, k=1).tolist() == [4]
+    assert policy.select_arms(available_indices, k=5).tolist() == [4, 1, 3]
+
+    policy.update(arm=4, reward=1)
+
+    assert policy.select_arms(available_indices, k=2).tolist() == [4, 1]
+
+
 def test_epsilon_greedy_agent_exploits_highest_available_values():
     agent = mab.EpsilonGreedyAgent(n_arms=5)
     agent.values = np.array([0.1, 0.8, 0.4, 0.9, 0.2])
