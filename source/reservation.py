@@ -61,7 +61,8 @@ def option_names_to_indices(option_names):
         for name in option_names
     ])
 
-def compute_acceptance_probability(customer, option_name):
+# for oracle
+def compute_deterministic_utility(customer, option_name):
 
     arm = ALL_OPTIONS[option_name]
 
@@ -121,10 +122,26 @@ def compute_acceptance_probability(customer, option_name):
             * CONFIG["GROUP_DELAY_PENALTY"]
         )
 
-    utility += np.random.normal(
-        0,
-        CONFIG["NOISE_STD"]
+    return utility
+
+#for oracle
+def compute_expected_acceptance_probability(customer, option_name):
+
+    utility = compute_deterministic_utility(customer, option_name)
+    probability = 1 / (1 + np.exp(-utility))
+
+    return np.clip(
+        probability,
+        CONFIG["MIN_ACCEPTANCE_PROBABILITY"],
+        CONFIG["MAX_ACCEPTANCE_PROBABILITY"]
     )
+
+
+def compute_acceptance_probability(customer, option_name):
+
+    utility = compute_deterministic_utility(customer, option_name)
+
+    utility += np.random.normal(0, CONFIG["NOISE_STD"])
 
     probability = 1 / (1 + np.exp(-utility))
 

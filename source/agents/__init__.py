@@ -4,6 +4,7 @@ from .ucb import UCB1Agent
 from .thompson import ThompsonSamplingAgent
 from .softmax import SoftmaxAgent
 from .fixed_order import FixedOrderPolicy
+from .oracle import OraclePolicy
 
 AGENTS = {
 
@@ -20,6 +21,8 @@ AGENTS = {
     "Softmax": SoftmaxAgent,
 
     "FixedOrder": FixedOrderPolicy,
+
+    "Oracle": OraclePolicy,
 }
 
 __all__ = [
@@ -29,6 +32,7 @@ __all__ = [
     "UCB1Agent",
     "ThompsonSamplingAgent",
     "SoftmaxAgent",
-    "FixedOrderPolicy",  # zmena
+    "FixedOrderPolicy",
+    "OraclePolicy",
     "AGENTS",
 ]

@@ -28,6 +28,9 @@ def run_experiment_with_option_stats(agent_class, k, customers):
         if len(available_indices) == 0:
             displayed_arms = np.array([])
         else:
+            # for the oracle to see
+            if hasattr(agent, "set_customer"):
+                agent.set_customer(customer)
             displayed_arms = agent.select_arms(available_indices, k)
 
         for arm in displayed_arms:
