@@ -95,6 +95,11 @@ def generate_customers(restaurants):
 
         }
 
+        customer["future_visit_frustration"] = (
+            0.5 * customer["urgency"]
+            + 0.5 * (1 - customer["time_flexibility"])
+        )
+
         customers.append(customer)
 
     return customers

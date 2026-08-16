@@ -300,6 +300,7 @@ def customers_to_dataframe(customers):
             "restaurant_loyalty": customer["restaurant_loyalty"],
             "perk_affinity": customer["perk_affinity"],
             "urgency": customer["urgency"],
+            "future_visit_frustration": customer["future_visit_frustration"],
             "group_size": customer["group_size"],
         })
 
@@ -772,6 +773,7 @@ def plot_customer_sample(customers_df, scenario_name, output_dir):
         "restaurant_loyalty",
         "perk_affinity",
         "urgency",
+        "future_visit_frustration",
     ]
 
     customers_df[affinity_columns].mean().plot(

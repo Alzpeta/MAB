@@ -14,6 +14,7 @@ def make_customer(**overrides):
         "restaurant_loyalty": 0.7,
         "perk_affinity": 0.5,
         "urgency": 0.3,
+        "future_visit_frustration": 0.45,
         "requested_hour": 12,
         "group_size": 2,
     }

@@ -1,0 +1,501 @@
+{
+  "run_name": "mab_run_init_20260816_152833",
+  "experiment": null,
+  "config_overrides": {
+    "N_CUSTOMERS": 20000,
+    "N_RUNS": 100,
+    "N_SHOWN_OPTIONS_LIST": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "SEED": 33
+  },
+  "config": {
+    "N_CUSTOMERS": 20000,
+    "N_RUNS": 100,
+    "SEED": 33,
+    "N_SHOWN_OPTIONS_LIST": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "N_DAYS": 7,
+    "OPEN_HOUR": 11,
+    "CLOSE_HOUR": 23,
+    "SLOTS_PER_HOUR": 20,
+    "EVENING_PEAK_HOURS": [
+      18,
+      19,
+      20,
+      21
+    ],
+    "EVENING_OCCUPANCY_BOOST": 0.2,
+    "WEEKEND_DAYS": [
+      4,
+      5
+    ],
+    "WEEKEND_OCCUPANCY_BOOST": 0.15,
+    "TIER_BASE_OCCUPANCY": {
+      "budget": 0.45,
+      "midrange": 0.6,
+      "premium": 0.75
+    },
+    "INITIAL_ACCEPTANCE_ESTIMATE": 0.15,
+    "DISCOUNT_AFFINITY_MEAN": 0.5,
+    "DISCOUNT_AFFINITY_STD": 0.2,
+    "TIME_FLEXIBILITY_MEAN": 0.5,
+    "TIME_FLEXIBILITY_STD": 0.2,
+    "LOYALTY_MEAN": 0.5,
+    "LOYALTY_STD": 0.2,
+    "PERK_AFFINITY_MEAN": 0.5,
+    "PERK_AFFINITY_STD": 0.2,
+    "URGENCY_MEAN": 0.5,
+    "URGENCY_STD": 0.25,
+    "BASE_UTILITY": -2.0,
+    "DISCOUNT_WEIGHT": 3.0,
+    "TIME_SHIFT_WEIGHT": 2.5,
+    "PERK_WEIGHT": 1.0,
+    "LOYALTY_WEIGHT": 0.1,
+    "URGENCY_DELAY_WEIGHT": 2.0,
+    "EVENING_DELAY_PENALTY": 0.7,
+    "GROUP_DELAY_PENALTY": 0.7,
+    "NOISE_STD": 0.6,
+    "TIME_SHIFT_NORMALIZER": 1440,
+    "MIN_ACCEPTANCE_PROBABILITY": 0.01,
+    "MAX_ACCEPTANCE_PROBABILITY": 0.95
+  },
+  "scenarios": {
+    "all": null
+  },
+  "agents": [
+    "Random",
+    "EpsilonGreedy",
+    "DecayEpsilon",
+    "UCB1",
+    "Thompson",
+    "Softmax"
+  ],
+  "options": {
+    "same_day_60min": {
+      "time_shift": 60,
+      "discount": 0.0,
+      "perk_value": 0.0
+    },
+    "same_day_120min": {
+      "time_shift": 120,
+      "discount": 0.0,
+      "perk_value": 0.0
+    },
+    "same_day_180min": {
+      "time_shift": 180,
+      "discount": 0.0,
+      "perk_value": 0.0
+    },
+    "next_day_same_time": {
+      "time_shift": 1440,
+      "discount": 0.0,
+      "perk_value": 0.0
+    },
+    "next_day_plus_10pct": {
+      "time_shift": 1440,
+      "discount": 0.1,
+      "perk_value": 0.0
+    },
+    "next_day_plus_vip": {
+      "time_shift": 1440,
+      "discount": 0.0,
+      "perk_value": 0.35
+    },
+    "next_day_plus_20pct": {
+      "time_shift": 1440,
+      "discount": 0.2,
+      "perk_value": 0.0
+    },
+    "next_day_plus_drink": {
+      "time_shift": 1440,
+      "discount": 0.0,
+      "perk_value": 0.18
+    },
+    "discount_5pct": {
+      "time_shift": 0,
+      "discount": 0.05,
+      "perk_value": 0.0
+    },
+    "discount_10pct": {
+      "time_shift": 0,
+      "discount": 0.1,
+      "perk_value": 0.0
+    },
+    "discount_15pct": {
+      "time_shift": 0,
+      "discount": 0.15,
+      "perk_value": 0.0
+    },
+    "discount_20pct": {
+      "time_shift": 0,
+      "discount": 0.2,
+      "perk_value": 0.0
+    },
+    "free_drink": {
+      "time_shift": 0,
+      "discount": 0.0,
+      "perk_value": 0.18
+    },
+    "free_appetizer": {
+      "time_shift": 0,
+      "discount": 0.0,
+      "perk_value": 0.28
+    },
+    "free_dessert": {
+      "time_shift": 0,
+      "discount": 0.0,
+      "perk_value": 0.24
+    },
+    "vip_table_upgrade": {
+      "time_shift": 0,
+      "discount": 0.0,
+      "perk_value": 0.34
+    },
+    "priority_future_booking": {
+      "time_shift": 0,
+      "discount": 0.0,
+      "perk_value": 0.22
+    },
+    "60min_plus_5pct": {
+      "time_shift": 60,
+      "discount": 0.05,
+      "perk_value": 0.0
+    },
+    "60min_plus_10pct": {
+      "time_shift": 60,
+      "discount": 0.1,
+      "perk_value": 0.0
+    },
+    "120min_plus_10pct": {
+      "time_shift": 120,
+      "discount": 0.1,
+      "perk_value": 0.0
+    },
+    "120min_plus_15pct": {
+      "time_shift": 120,
+      "discount": 0.15,
+      "perk_value": 0.0
+    },
+    "180min_plus_15pct": {
+      "time_shift": 180,
+      "discount": 0.15,
+      "perk_value": 0.0
+    },
+    "180min_plus_20pct": {
+      "time_shift": 180,
+      "discount": 0.2,
+      "perk_value": 0.0
+    },
+    "60min_plus_drink": {
+      "time_shift": 60,
+      "discount": 0.0,
+      "perk_value": 0.18
+    },
+    "120min_plus_dessert": {
+      "time_shift": 120,
+      "discount": 0.0,
+      "perk_value": 0.24
+    },
+    "120min_plus_vip": {
+      "time_shift": 120,
+      "discount": 0.0,
+      "perk_value": 0.34
+    },
+    "180min_plus_apetizer": {
+      "time_shift": 180,
+      "discount": 0.0,
+      "perk_value": 0.28
+    },
+    "60min_plus_10pct_plus_drink": {
+      "time_shift": 60,
+      "discount": 0.1,
+      "perk_value": 0.18
+    },
+    "60min_plus_5pct_plus_dessert": {
+      "time_shift": 60,
+      "discount": 0.05,
+      "perk_value": 0.24
+    },
+    "180min_plus_10pct_plus_vip": {
+      "time_shift": 180,
+      "discount": 0.1,
+      "perk_value": 0.34
+    },
+    "120min_plus_10pct_plus_drink": {
+      "time_shift": 120,
+      "discount": 0.1,
+      "perk_value": 0.18
+    },
+    "180min_plus_05pct_plus_dessert": {
+      "time_shift": 180,
+      "discount": 0.05,
+      "perk_value": 0.24
+    },
+    "60min_plus_20pct": {
+      "time_shift": 60,
+      "discount": 0.2,
+      "perk_value": 0.0
+    },
+    "180min_plus_drink": {
+      "time_shift": 180,
+      "discount": 0.0,
+      "perk_value": 0.18
+    },
+    "120min_plus_20pct": {
+      "time_shift": 120,
+      "discount": 0.2,
+      "perk_value": 0.0
+    },
+    "60min_plus_15pct_plus_drink": {
+      "time_shift": 60,
+      "discount": 0.15,
+      "perk_value": 0.18
+    },
+    "120min_plus_5pct_plus_vip": {
+      "time_shift": 120,
+      "discount": 0.05,
+      "perk_value": 0.34
+    },
+    "120min_plus_5pct": {
+      "time_shift": 120,
+      "discount": 0.05,
+      "perk_value": 0.0
+    },
+    "180min_plus_20pct_plus_drink": {
+      "time_shift": 180,
+      "discount": 0.2,
+      "perk_value": 0.18
+    },
+    "next_day_plus_10pct_plus_drink": {
+      "time_shift": 1440,
+      "discount": 0.1,
+      "perk_value": 0.18
+    }
+  },
+  "restaurant_configs": {
+    "0": {
+      "name": "Lacny Tanier",
+      "tier": "budget",
+      "tag": "high-compensation",
+      "allowed_options": [
+        "discount_20pct",
+        "60min_plus_20pct",
+        "60min_plus_15pct_plus_drink",
+        "120min_plus_dessert",
+        "free_drink",
+        "180min_plus_apetizer",
+        "180min_plus_15pct"
+      ]
+    },
+    "1": {
+      "name": "U Hladneho Vlka",
+      "tier": "budget",
+      "tag": "low-compensation",
+      "allowed_options": [
+        "same_day_120min",
+        "180min_plus_drink",
+        "next_day_same_time",
+        "discount_5pct",
+        "priority_future_booking",
+        "180min_plus_05pct_plus_dessert",
+        "60min_plus_drink"
+      ]
+    },
+    "2": {
+      "name": "Treska & Sen",
+      "tier": "budget",
+      "tag": "moderate",
+      "allowed_options": [
+        "discount_15pct",
+        "priority_future_booking",
+        "60min_plus_10pct",
+        "120min_plus_10pct_plus_drink",
+        "free_dessert",
+        "next_day_plus_10pct",
+        "60min_plus_drink"
+      ]
+    },
+    "3": {
+      "name": "Kapustovy Dom",
+      "tier": "budget",
+      "tag": "high-compensation",
+      "allowed_options": [
+        "discount_20pct",
+        "same_day_60min",
+        "180min_plus_15pct",
+        "120min_plus_15pct",
+        "free_appetizer",
+        "next_day_plus_10pct_plus_drink",
+        "120min_plus_dessert"
+      ]
+    },
+    "4": {
+      "name": "Rychla Bryndza",
+      "tier": "budget",
+      "tag": "low-compensation",
+      "allowed_options": [
+        "same_day_60min",
+        "180min_plus_15pct",
+        "180min_plus_apetizer",
+        "discount_10pct",
+        "priority_future_booking",
+        "next_day_same_time",
+        "same_day_120min"
+      ]
+    },
+    "5": {
+      "name": "Zlaty Rezen",
+      "tier": "midrange",
+      "tag": "high-compensation",
+      "allowed_options": [
+        "discount_15pct",
+        "180min_plus_20pct_plus_drink",
+        "120min_plus_10pct_plus_drink",
+        "120min_plus_vip",
+        "free_dessert",
+        "same_day_60min",
+        "next_day_plus_vip"
+      ]
+    },
+    "6": {
+      "name": "Knedla u Deda",
+      "tier": "midrange",
+      "tag": "moderate",
+      "allowed_options": [
+        "discount_10pct",
+        "same_day_180min",
+        "120min_plus_15pct",
+        "60min_plus_drink",
+        "vip_table_upgrade",
+        "next_day_plus_vip",
+        "120min_plus_10pct_plus_drink"
+      ]
+    },
+    "7": {
+      "name": "Pirohove Nebo",
+      "tier": "midrange",
+      "tag": "low-compensation",
+      "allowed_options": [
+        "same_day_60min",
+        "180min_plus_drink",
+        "next_day_same_time",
+        "discount_5pct",
+        "120min_plus_dessert",
+        "priority_future_booking",
+        "120min_plus_5pct"
+      ]
+    },
+    "8": {
+      "name": "Haluska Palace",
+      "tier": "midrange",
+      "tag": "moderate",
+      "allowed_options": [
+        "discount_10pct",
+        "60min_plus_10pct_plus_drink",
+        "120min_plus_5pct_plus_vip",
+        "vip_table_upgrade",
+        "same_day_180min",
+        "next_day_plus_vip",
+        "free_appetizer"
+      ]
+    },
+    "9": {
+      "name": "Mastny Obrus",
+      "tier": "midrange",
+      "tag": "moderate",
+      "allowed_options": [
+        "discount_15pct",
+        "same_day_60min",
+        "180min_plus_20pct",
+        "free_appetizer",
+        "120min_plus_10pct_plus_drink",
+        "next_day_plus_10pct",
+        "120min_plus_dessert"
+      ]
+    },
+    "10": {
+      "name": "Pan Hranolka",
+      "tier": "premium",
+      "tag": "low-compensation",
+      "allowed_options": [
+        "discount_5pct",
+        "same_day_60min",
+        "priority_future_booking",
+        "vip_table_upgrade",
+        "next_day_same_time",
+        "180min_plus_drink",
+        "120min_plus_dessert"
+      ]
+    },
+    "11": {
+      "name": "Grand Bryndza",
+      "tier": "premium",
+      "tag": "high-compensation",
+      "allowed_options": [
+        "discount_10pct",
+        "60min_plus_15pct_plus_drink",
+        "120min_plus_vip",
+        "vip_table_upgrade",
+        "same_day_180min",
+        "next_day_plus_vip",
+        "120min_plus_10pct"
+      ]
+    },
+    "12": {
+      "name": "Luxusny Gulas",
+      "tier": "premium",
+      "tag": "moderate",
+      "allowed_options": [
+        "discount_10pct",
+        "same_day_120min",
+        "priority_future_booking",
+        "180min_plus_10pct_plus_vip",
+        "free_appetizer",
+        "next_day_plus_10pct",
+        "60min_plus_10pct"
+      ]
+    },
+    "13": {
+      "name": "Baron Parok",
+      "tier": "premium",
+      "tag": "low-compensation",
+      "allowed_options": [
+        "same_day_120min",
+        "next_day_same_time",
+        "discount_5pct",
+        "priority_future_booking",
+        "180min_plus_05pct_plus_dessert",
+        "vip_table_upgrade",
+        "180min_plus_drink"
+      ]
+    },
+    "14": {
+      "name": "Kralovsky Langoš",
+      "tier": "premium",
+      "tag": "high-compensation",
+      "allowed_options": [
+        "discount_10pct",
+        "60min_plus_20pct",
+        "120min_plus_20pct",
+        "120min_plus_5pct_plus_vip",
+        "vip_table_upgrade",
+        "next_day_plus_20pct",
+        "60min_plus_15pct_plus_drink"
+      ]
+    }
+  }
+}

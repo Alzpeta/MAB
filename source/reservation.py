@@ -101,6 +101,12 @@ def compute_acceptance_probability(customer, option_name):
         * CONFIG["LOYALTY_WEIGHT"]
     )
 
+    utility -= (
+        arm["requires_future_visit"]
+        * customer["future_visit_frustration"]
+        * CONFIG["FUTURE_VISIT_FRUSTRATION_WEIGHT"] #default as 1
+    )
+
     if customer["requested_hour"] >= 19:
 
         utility -= (
@@ -181,4 +187,3 @@ class ReservationEnvironment:
             "reward": reward,
             "done": done
         }
-
