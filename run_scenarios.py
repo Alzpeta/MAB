@@ -328,6 +328,9 @@ def run_scenario(scenario_name, restaurant_tiers):
 
     run_result_rows = []
     all_option_results = []
+    # zmena zacatek
+    all_position_results = []
+    # zmena konec
 
     random_reward_by_k = {}
 
@@ -359,11 +362,17 @@ def run_scenario(scenario_name, restaurant_tiers):
 
                 np.random.seed(CONFIG["SEED"] + 10000 + run)
 
-                mean_reward, option_stats_df = run_experiment_with_option_stats(
+                # zmena zacatek
+                (
+                    mean_reward,
+                    option_stats_df,
+                    position_stats_df,
+                ) = run_experiment_with_option_stats(
                     agent_class,
                     k,
                     customers
                 )
+                # zmena konec
 
                 run_rewards.append(mean_reward)
 
@@ -390,6 +399,19 @@ def run_scenario(scenario_name, restaurant_tiers):
                 option_stats_df["top_k"] = k
                 option_stats_df["run"] = run
                 all_option_results.append(option_stats_df)
+
+                # zmena zacatek
+                position_stats_df["scenario"] = scenario_name
+                position_stats_df["restaurant_tiers"] = (
+                    "all"
+                    if restaurant_tiers is None
+                    else ", ".join(restaurant_tiers)
+                )
+                position_stats_df["agent"] = agent_name
+                position_stats_df["top_k"] = k
+                position_stats_df["run"] = run
+                all_position_results.append(position_stats_df)
+                # zmena konec
 
                 print_progress(
                     progress_label,
@@ -555,11 +577,43 @@ def run_scenario(scenario_name, restaurant_tiers):
         .replace([np.inf, -np.inf], np.nan)
     )
 
+    # zmena zacatek
+    position_results_df = pd.concat(all_position_results, ignore_index=True)
+    position_summary_df = (
+        position_results_df
+        .groupby(
+            [
+                "scenario",
+                "restaurant_tiers",
+                "agent",
+                "top_k",
+                "position",
+            ],
+            as_index=False
+        )
+        [[
+            "position_shown_count",
+            "position_accepted_count",
+            "abandoned_after_position_count",
+        ]]
+        .sum()
+    )
+    position_summary_df["position_acceptance_rate"] = (
+        position_summary_df["position_accepted_count"]
+        / position_summary_df["position_shown_count"]
+    )
+    position_summary_df["position_acceptance_rate"] = (
+        position_summary_df["position_acceptance_rate"]
+        .replace([np.inf, -np.inf], np.nan)
+    )
+    # zmena konec
+
     return (
         results_df,
         option_summary_df,
         restaurants_to_dataframe(sample_restaurants),
         customers_to_dataframe(sample_customers),
+        position_summary_df,
     )
 
 
@@ -975,15 +1029,26 @@ def run_configured_scenarios(
 
     scenario_results = []
     scenario_option_results = []
+    # zmena zacatek
+    scenario_position_results = []
+    # zmena konec
 
     for scenario_name, restaurant_tiers in scenarios.items():
         scenario_dir = output_dir / scenario_name
         scenario_dir.mkdir()
 
-        results_df, option_results_df, restaurants_df, customers_df = run_scenario(
+        # zmena zacatek
+        (
+            results_df,
+            option_results_df,
+            restaurants_df,
+            customers_df,
+            position_results_df,
+        ) = run_scenario(
             scenario_name,
             restaurant_tiers
         )
+        # zmena konec
 
         option_category_df = (
             option_results_df
@@ -1012,6 +1077,12 @@ def run_configured_scenarios(
             scenario_dir / "options_by_category.csv",
             index=False
         )
+        # zmena zacatek
+        position_results_df.to_csv(
+            scenario_dir / "position_metrics.csv",
+            index=False
+        )
+        # zmena konec
         restaurants_df.to_csv(
             scenario_dir / "restaurants.csv",
             index=False
@@ -1045,6 +1116,13 @@ def run_configured_scenarios(
             scenario_dir / "options_detail.html",
             f"Options detail - {scenario_name}"
         )
+        # zmena zacatek
+        save_pretty_table(
+            position_results_df.sort_values(["agent", "top_k", "position"]),
+            scenario_dir / "position_metrics.html",
+            f"Position metrics - {scenario_name}"
+        )
+        # zmena konec
 
         plot_scenario_results(results_df, scenario_name, scenario_dir)
         plot_result_tables(results_df, scenario_name, scenario_dir)
@@ -1063,17 +1141,32 @@ def run_configured_scenarios(
 
         scenario_results.append(results_df)
         scenario_option_results.append(option_results_df)
+        # zmena zacatek
+        scenario_position_results.append(position_results_df)
+        # zmena konec
 
     all_results_df = pd.concat(scenario_results, ignore_index=True)
     all_option_results_df = pd.concat(
         scenario_option_results,
         ignore_index=True
     )
+    # zmena zacatek
+    all_position_results_df = pd.concat(
+        scenario_position_results,
+        ignore_index=True
+    )
+    # zmena konec
     all_results_df.to_csv(output_dir / "all_results.csv", index=False)
     all_option_results_df.to_csv(
         output_dir / "all_options_detail.csv",
         index=False
     )
+    # zmena zacatek
+    all_position_results_df.to_csv(
+        output_dir / "all_position_metrics.csv",
+        index=False
+    )
+    # zmena konec
     save_pretty_table(
         all_results_df,
         output_dir / "all_results.html",
@@ -1087,6 +1180,15 @@ def run_configured_scenarios(
         output_dir / "all_options_detail.html",
         "All option results"
     )
+    # zmena zacatek
+    save_pretty_table(
+        all_position_results_df.sort_values(
+            ["scenario", "agent", "top_k", "position"]
+        ),
+        output_dir / "all_position_metrics.html",
+        "All position metrics"
+    )
+    # zmena konec
     plot_overall_comparison(all_results_df, output_dir)
     plot_overall_result_heatmap(all_results_df, output_dir)
 

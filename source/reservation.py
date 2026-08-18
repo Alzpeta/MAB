@@ -165,33 +165,40 @@ class ReservationEnvironment:
     def get_customer(self):
         return self.customers[self.t]
 
+    # zmena zacatek
     def customer_choice(self, displayed_arm_indices):
 
         customer = self.get_customer()
-
+        evaluated_arms = []
 
         if len(displayed_arm_indices) == 0:
-            return None, 0
+            return None, 0, evaluated_arms, False
 
-        for arm_index in displayed_arm_indices:
+        for position, arm_index in enumerate(displayed_arm_indices):
 
+            evaluated_arms.append(arm_index)
             option_name = OPTION_NAMES[arm_index]
-
-            p_accept = compute_acceptance_probability(
-                customer,
-                option_name
-            )
-
+            p_accept = compute_acceptance_probability(customer, option_name)
             accepted = np.random.rand() < p_accept
 
             if accepted:
-                return arm_index, 1
+                return arm_index, 1, evaluated_arms, False
 
-        return None, 0
+            is_last_displayed_arm = position == len(displayed_arm_indices) - 1
+            if (
+                not is_last_displayed_arm
+                and CONFIG["ABANDONMENT_PROBABILITY"] > 0
+                and np.random.rand() < CONFIG["ABANDONMENT_PROBABILITY"]
+            ):
+                return None, 0, evaluated_arms, True
+
+        return None, 0, evaluated_arms, False
+    # zmena konec
 
     def step(self, displayed_arm_indices):
 
-        chosen_arm, reward = self.customer_choice(
+        # zmena zacatek
+        chosen_arm, reward, evaluated_arms, abandoned = self.customer_choice(
             displayed_arm_indices
         )
 
@@ -202,5 +209,8 @@ class ReservationEnvironment:
         return {
             "chosen_arm": chosen_arm,
             "reward": reward,
+            "evaluated_arms": evaluated_arms,
+            "abandoned": abandoned,
             "done": done
         }
+        # zmena konec

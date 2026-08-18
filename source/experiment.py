@@ -15,6 +15,11 @@ def run_experiment_with_option_stats(agent_class, k, customers):
     rewards = []
     shown_counts = np.zeros(N_ARMS)
     accepted_counts = np.zeros(N_ARMS)
+    # zmena zacatek
+    position_shown_counts = np.zeros(k, dtype=int)
+    position_accepted_counts = np.zeros(k, dtype=int)
+    abandoned_after_position_counts = np.zeros(k, dtype=int)
+    # zmena konec
 
     env.reset()
 
@@ -33,17 +38,24 @@ def run_experiment_with_option_stats(agent_class, k, customers):
                 agent.set_customer(customer)
             displayed_arms = agent.select_arms(available_indices, k)
 
-        for arm in displayed_arms:
-            shown_counts[arm] += 1
-
         result = env.step(displayed_arms)
         reward = result["reward"]
         rewards.append(reward)
 
+        # zmena zacatek
+        evaluated_arms = result["evaluated_arms"]
+        for position, arm in enumerate(evaluated_arms):
+            shown_counts[arm] += 1
+            position_shown_counts[position] += 1
+
         if result["chosen_arm"] is not None:
             accepted_counts[result["chosen_arm"]] += 1
+            position_accepted_counts[len(evaluated_arms) - 1] += 1
 
-        for arm in displayed_arms:
+        if result["abandoned"]:
+            abandoned_after_position_counts[len(evaluated_arms) - 1] += 1
+
+        for arm in evaluated_arms:
             if result["chosen_arm"] is None:
                 agent.update(arm, 0)
             elif arm == result["chosen_arm"]:
@@ -51,6 +63,7 @@ def run_experiment_with_option_stats(agent_class, k, customers):
                 break
             else:
                 agent.update(arm, 0)
+        # zmena konec
 
         if result["done"]:
             break
@@ -75,4 +88,31 @@ def run_experiment_with_option_stats(agent_class, k, customers):
             "acceptance_rate": acceptance_rate,
         })
 
-    return np.mean(rewards), pd.DataFrame(option_rows)
+    # zmena zacatek
+    position_rows = []
+    for position in range(k):
+        position_shown_count = position_shown_counts[position]
+        position_accepted_count = position_accepted_counts[position]
+        if position_shown_count == 0:
+            position_acceptance_rate = np.nan
+        else:
+            position_acceptance_rate = (
+                position_accepted_count / position_shown_count
+            )
+
+        position_rows.append({
+            "position": position + 1,
+            "position_shown_count": position_shown_count,
+            "position_accepted_count": position_accepted_count,
+            "position_acceptance_rate": position_acceptance_rate,
+            "abandoned_after_position_count": (
+                abandoned_after_position_counts[position]
+            ),
+        })
+
+    return (
+        np.mean(rewards),
+        pd.DataFrame(option_rows),
+        pd.DataFrame(position_rows),
+    )
+    # zmena konec
