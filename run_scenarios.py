@@ -267,6 +267,81 @@ def print_progress(label, current, total, start_time):
         sys.stdout.flush()
 
 
+# zmena zacatek
+def summarize_confidence_interval(values):
+    values = np.asarray(values, dtype=float)
+    mean_value = values.mean()
+
+    if len(values) < 2:
+        return mean_value, 0.0, mean_value, mean_value
+
+    standard_deviation = values.std(ddof=1)
+    ci95 = 1.96 * standard_deviation / np.sqrt(len(values))
+
+    return (
+        mean_value,
+        ci95,
+        mean_value - ci95,
+        mean_value + ci95,
+    )
+
+
+def add_paired_difference_confidence_intervals(
+    results_df,
+    run_results_df,
+    baseline_agent,
+    column_prefix,
+):
+    baseline_runs = run_results_df[
+        run_results_df["agent"] == baseline_agent
+    ]
+
+    for index, row in results_df.iterrows():
+        candidate_runs = run_results_df[
+            (run_results_df["scenario"] == row["scenario"])
+            & (run_results_df["restaurant_tiers"] == row["restaurant_tiers"])
+            & (run_results_df["top_k"] == row["top_k"])
+            & (run_results_df["agent"] == row["agent"])
+        ][["run", "reward"]]
+        matching_baseline_runs = baseline_runs[
+            (baseline_runs["scenario"] == row["scenario"])
+            & (baseline_runs["restaurant_tiers"] == row["restaurant_tiers"])
+            & (baseline_runs["top_k"] == row["top_k"])
+        ][["run", "reward"]]
+        paired_runs = candidate_runs.merge(
+            matching_baseline_runs,
+            on="run",
+            suffixes=("_candidate", "_baseline"),
+        )
+
+        if paired_runs.empty:
+            mean_difference = np.nan
+            ci95 = np.nan
+            ci95_lower = np.nan
+            ci95_upper = np.nan
+        else:
+            differences = (
+                paired_runs["reward_candidate"]
+                - paired_runs["reward_baseline"]
+            )
+            (
+                mean_difference,
+                ci95,
+                ci95_lower,
+                ci95_upper,
+            ) = summarize_confidence_interval(differences)
+
+        results_df.loc[index, f"{column_prefix}_mean_difference"] = (
+            mean_difference
+        )
+        results_df.loc[index, f"{column_prefix}_ci95"] = ci95
+        results_df.loc[index, f"{column_prefix}_ci95_lower"] = ci95_lower
+        results_df.loc[index, f"{column_prefix}_ci95_upper"] = ci95_upper
+
+    return results_df
+# zmena konec
+
+
 def make_output_dir(run_name=None):
     if run_name is None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -420,9 +495,15 @@ def run_scenario(scenario_name, restaurant_tiers):
                     progress_started_at
                 )
 
-            mean_reward = np.mean(run_rewards)
-            std_reward = np.std(run_rewards)
-            ci95 = 1.96 * std_reward / np.sqrt(CONFIG["N_RUNS"])
+            # zmena zacatek
+            (
+                mean_reward,
+                ci95,
+                ci95_lower,
+                ci95_upper,
+            ) = summarize_confidence_interval(run_rewards)
+            std_reward = np.std(run_rewards, ddof=1) if len(run_rewards) > 1 else 0
+            # zmena konec
 
             if agent_name == "Random":
                 random_reward_by_k[k] = mean_reward
@@ -449,6 +530,10 @@ def run_scenario(scenario_name, restaurant_tiers):
                 "mean_reward": mean_reward,
                 "std_reward": std_reward,
                 "ci95": ci95,
+                # zmena zacatek
+                "ci95_lower": ci95_lower,
+                "ci95_upper": ci95_upper,
+                # zmena konec
                 "improvement_vs_random_pct": improvement,
             })
 
@@ -508,17 +593,30 @@ def run_scenario(scenario_name, restaurant_tiers):
     for (scenario, tiers, agent, top_k), group in run_results_df.groupby(
         ["scenario", "restaurant_tiers", "agent", "top_k"]
     ):
-        rewards = group["reward"]
+        # zmena zacatek
+        (
+            mean_reward,
+            ci95,
+            ci95_lower,
+            ci95_upper,
+        ) = summarize_confidence_interval(group["reward"])
+        # zmena konec
         all_results.append({
             "scenario": scenario,
             "restaurant_tiers": tiers,
             "agent": agent,
             "top_k": top_k,
-            "mean_reward": rewards.mean(),
-            "std_reward": rewards.std(ddof=0),
-            "ci95": 1.96 * rewards.std(ddof=0) / np.sqrt(CONFIG["N_RUNS"]),
-            "min_reward": rewards.min(),
-            "max_reward": rewards.max(),
+            "mean_reward": mean_reward,
+            # zmena zacatek
+            "std_reward": (
+                group["reward"].std(ddof=1) if len(group) > 1 else 0
+            ),
+            "ci95": ci95,
+            "ci95_lower": ci95_lower,
+            "ci95_upper": ci95_upper,
+            # zmena konec
+            "min_reward": group["reward"].min(),
+            "max_reward": group["reward"].max(),
         })
 
     results_df = pd.DataFrame(all_results)
@@ -539,6 +637,21 @@ def run_scenario(scenario_name, restaurant_tiers):
                 (row["mean_reward"] - random_reward)
                 / random_reward
             ) * 100
+
+    # zmena zacatek
+    results_df = add_paired_difference_confidence_intervals(
+        results_df,
+        run_results_df,
+        "Random",
+        "vs_random",
+    )
+    results_df = add_paired_difference_confidence_intervals(
+        results_df,
+        run_results_df,
+        "FixedOrder",
+        "vs_fixed_order",
+    )
+    # zmena konec
 
     results_df = results_df.sort_values(
         ["scenario", "top_k", "mean_reward"],
@@ -748,6 +861,14 @@ def plot_scenario_results(results_df, scenario_name, output_dir):
     for agent_name in results_df["agent"].unique():
         subset = results_df[results_df["agent"] == agent_name]
 
+        # zmena zacatek
+        plt.fill_between(
+            subset["top_k"],
+            subset["ci95_lower"],
+            subset["ci95_upper"],
+            alpha=0.15,
+        )
+        # zmena konec
         plt.plot(
             subset["top_k"],
             subset["mean_reward"],
