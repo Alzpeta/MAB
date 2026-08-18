@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+import numpy as np
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import source.reservation as mab
@@ -137,6 +139,32 @@ def test_customer_choice_abandons_after_a_rejected_offer(monkeypatch):
     assert evaluated_arms == [displayed_arm_indices[0]]
     assert abandoned is True
 # zmena konec
+
+
+def test_outcome_seed_is_independent_of_global_rng_consumption(monkeypatch):
+    displayed_arm_indices = [mab.OPTION_NAMES.index("discount_5pct")]
+    monkeypatch.setitem(mab.CONFIG, "ABANDONMENT_PROBABILITY", 0)
+    monkeypatch.setattr(
+        mab,
+        "compute_acceptance_probability",
+        lambda customer, option_name, rng=None: 0.5,
+    )
+
+    first_environment = mab.ReservationEnvironment(
+        make_customers(1),
+        outcome_seed=123,
+    )
+    first_result = first_environment.step(displayed_arm_indices)
+
+    np.random.rand(100)
+
+    second_environment = mab.ReservationEnvironment(
+        make_customers(1),
+        outcome_seed=123,
+    )
+    second_result = second_environment.step(displayed_arm_indices)
+
+    assert second_result == first_result
 
 
 # zmena zacatek

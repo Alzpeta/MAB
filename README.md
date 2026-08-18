@@ -26,5 +26,11 @@ The model generates restaurants, customers, available reservation options, and t
 
 ## Outputs
 
-Experiment outputs are written into `outputs/`.
+Experiment outputs are written into `outputs/` as CSV tables. Each scenario
+contains aggregate results, per-run rewards, option and position metrics,
+restaurant data, the complete generated customer dataset, a 200-row customer
+sample, and descriptive customer statistics. The run configuration remains in
+`config_used.json` so its nested structure is preserved for reproducibility.
 
+The runner does not generate charts or HTML reports. All data needed to create
+them separately is retained in the CSV and JSON outputs.

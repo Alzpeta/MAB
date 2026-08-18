@@ -137,11 +137,12 @@ def compute_expected_acceptance_probability(customer, option_name):
     )
 
 
-def compute_acceptance_probability(customer, option_name):
+def compute_acceptance_probability(customer, option_name, rng=None):
 
     utility = compute_deterministic_utility(customer, option_name)
+    rng = np.random if rng is None else rng
 
-    utility += np.random.normal(0, CONFIG["NOISE_STD"])
+    utility += rng.normal(0, CONFIG["NOISE_STD"])
 
     probability = 1 / (1 + np.exp(-utility))
 
@@ -154,10 +155,23 @@ def compute_acceptance_probability(customer, option_name):
 
 class ReservationEnvironment:
 
-    def __init__(self, customers):
+    def __init__(self, customers, outcome_seed=None):
 
         self.customers = customers
         self.t = 0
+        self.outcome_seed = outcome_seed
+
+    def _outcome_rng(self, identifier, stream):
+        if self.outcome_seed is None:
+            return None
+
+        seed_sequence = np.random.SeedSequence([
+            int(self.outcome_seed),
+            int(self.t),
+            int(identifier),
+            int(stream),
+        ])
+        return np.random.default_rng(seed_sequence)
 
     def reset(self):
         self.t = 0
@@ -165,7 +179,6 @@ class ReservationEnvironment:
     def get_customer(self):
         return self.customers[self.t]
 
-    # zmena zacatek
     def customer_choice(self, displayed_arm_indices):
 
         customer = self.get_customer()
@@ -178,8 +191,20 @@ class ReservationEnvironment:
 
             evaluated_arms.append(arm_index)
             option_name = OPTION_NAMES[arm_index]
-            p_accept = compute_acceptance_probability(customer, option_name)
-            accepted = np.random.rand() < p_accept
+            outcome_rng = self._outcome_rng(arm_index, stream=0)
+            if outcome_rng is None:
+                p_accept = compute_acceptance_probability(customer, option_name)
+            else:
+                p_accept = compute_acceptance_probability(
+                    customer,
+                    option_name,
+                    rng=outcome_rng,
+                )
+            accepted = (
+                outcome_rng.random()
+                if outcome_rng is not None
+                else np.random.rand()
+            ) < p_accept
 
             if accepted:
                 return arm_index, 1, evaluated_arms, False
@@ -188,16 +213,18 @@ class ReservationEnvironment:
             if (
                 not is_last_displayed_arm
                 and CONFIG["ABANDONMENT_PROBABILITY"] > 0
-                and np.random.rand() < CONFIG["ABANDONMENT_PROBABILITY"]
+                and (
+                    self._outcome_rng(position, stream=1).random()
+                    if self.outcome_seed is not None
+                    else np.random.rand()
+                ) < CONFIG["ABANDONMENT_PROBABILITY"]
             ):
                 return None, 0, evaluated_arms, True
 
         return None, 0, evaluated_arms, False
-    # zmena konec
 
     def step(self, displayed_arm_indices):
 
-        # zmena zacatek
         chosen_arm, reward, evaluated_arms, abandoned = self.customer_choice(
             displayed_arm_indices
         )
@@ -213,4 +240,3 @@ class ReservationEnvironment:
             "abandoned": abandoned,
             "done": done
         }
-        # zmena konec

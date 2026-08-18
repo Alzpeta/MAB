@@ -3,9 +3,9 @@ import numpy as np
 
 class SoftmaxAgent(BaseAgent):
 
-    def __init__(self, n_arms, temperature=0.1):
+    def __init__(self, n_arms, temperature=0.1, rng=None):
 
-        super().__init__(n_arms)
+        super().__init__(n_arms, rng=rng)
 
         self.temperature = temperature
 
@@ -24,7 +24,7 @@ class SoftmaxAgent(BaseAgent):
 
         probs = exp_scores / exp_scores.sum()
 
-        return np.random.choice(
+        return self.rng.choice(
             available_indices,
             size=min(k, len(available_indices)),
             replace=False,

@@ -73,12 +73,12 @@ def test_position_metrics_only_count_offers_evaluated_before_abandonment(
         position_stats_df["position"] == 2
     ].iloc[0]
 
-    assert first_arm_row["shown_count"] == 1
-    assert second_arm_row["shown_count"] == 0
-    assert first_position["position_shown_count"] == 1
+    assert first_arm_row["examined_count"] == 1
+    assert second_arm_row["examined_count"] == 0
+    assert first_position["position_examined_count"] == 1
     assert first_position["position_acceptance_rate"] == 0
     assert first_position["abandoned_after_position_count"] == 1
-    assert second_position["position_shown_count"] == 0
+    assert second_position["position_examined_count"] == 0
     assert np.isnan(second_position["position_acceptance_rate"])
     assert second_position["abandoned_after_position_count"] == 0
 # zmena konec

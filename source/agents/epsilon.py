@@ -4,17 +4,17 @@ from .base import BaseAgent
 
 class EpsilonGreedyAgent(BaseAgent):
 
-    def __init__(self, n_arms, epsilon=0.1):
+    def __init__(self, n_arms, epsilon=0.1, rng=None):
 
-        super().__init__(n_arms)
+        super().__init__(n_arms, rng=rng)
 
         self.epsilon = epsilon
 
     def select_arms(self, available_indices, k):
 
-        if np.random.rand() < self.epsilon:
+        if self.rng.random() < self.epsilon:
 
-            return np.random.choice(
+            return self.rng.choice(
                 available_indices,
                 size=min(k, len(available_indices)),
                 replace=False
@@ -34,11 +34,12 @@ class DecayEpsilonAgent(BaseAgent):
     def __init__(
         self,
         n_arms,
-        epsilon_0=0.1,
-        min_epsilon=0.01
+        epsilon_0=1.0,
+        min_epsilon=0.01,
+        rng=None,
     ):
 
-        super().__init__(n_arms)
+        super().__init__(n_arms, rng=rng)
 
         self.epsilon_0 = epsilon_0
         self.min_epsilon = min_epsilon
@@ -54,9 +55,9 @@ class DecayEpsilonAgent(BaseAgent):
 
         self.t += 1
 
-        if np.random.rand() < epsilon:
+        if self.rng.random() < epsilon:
 
-            return np.random.choice(
+            return self.rng.choice(
                 available_indices,
                 size=min(k, len(available_indices)),
                 replace=False

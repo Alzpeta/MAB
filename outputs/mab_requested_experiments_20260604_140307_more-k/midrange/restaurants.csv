@@ -1,6 +1,0 @@
-restaurant_id,name,tier,allowed_options
-5,Zlaty Rezen,midrange,"discount_15pct, 180min_plus_20pct_plus_drink, 120min_plus_10pct_plus_drink, 120min_plus_vip, free_dessert, same_day_60min, next_day_plus_vip"
-6,Knedla u Deda,midrange,"discount_10pct, same_day_180min, 120min_plus_15pct, 60min_plus_drink, vip_table_upgrade, next_day_plus_vip, 120min_plus_10pct_plus_drink"
-7,Pirohove Nebo,midrange,"same_day_60min, 180min_plus_drink, next_day_same_time, discount_5pct, 120min_plus_dessert, priority_future_booking, 120min_plus_5pct"
-8,Haluska Palace,midrange,"discount_10pct, 60min_plus_10pct_plus_drink, 120min_plus_5pct_plus_vip, vip_table_upgrade, same_day_180min, next_day_plus_vip, free_appetizer"
-9,Mastny Obrus,midrange,"discount_15pct, same_day_60min, 180min_plus_20pct, free_appetizer, 120min_plus_10pct_plus_drink, next_day_plus_10pct, 120min_plus_dessert"

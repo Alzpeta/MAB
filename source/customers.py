@@ -1,13 +1,15 @@
 from .config import CONFIG
 import numpy as np
 
-def generate_customers(restaurants):
+def generate_customers(restaurants, rng=None):
+
+    rng = np.random if rng is None else rng
 
     customers = []
 
     for customer_id in range(CONFIG["N_CUSTOMERS"]):
 
-        restaurant = np.random.choice(restaurants)
+        restaurant = rng.choice(restaurants)
 
         day_weights = np.ones(CONFIG["N_DAYS"])
         day_weights[CONFIG["WEEKEND_DAYS"]] += CONFIG["WEEKEND_OCCUPANCY_BOOST"]
@@ -27,20 +29,20 @@ def generate_customers(restaurants):
             "restaurant_id": restaurant["restaurant_id"],
 
             "requested_day":
-                np.random.choice(
+                rng.choice(
                     np.arange(CONFIG["N_DAYS"]),
                     p=day_probabilities
                 ),
 
             "requested_hour":
-                np.random.choice(
+                rng.choice(
                     hours,
                     p=hour_probabilities
                 ),
 
             "discount_affinity":
                 np.clip(
-                    np.random.normal(
+                    rng.normal(
                         CONFIG["DISCOUNT_AFFINITY_MEAN"],
                         CONFIG["DISCOUNT_AFFINITY_STD"]
                     ),
@@ -50,7 +52,7 @@ def generate_customers(restaurants):
 
             "time_flexibility":
                 np.clip(
-                    np.random.normal(
+                    rng.normal(
                         CONFIG["TIME_FLEXIBILITY_MEAN"],
                         CONFIG["TIME_FLEXIBILITY_STD"]
                     ),
@@ -60,7 +62,7 @@ def generate_customers(restaurants):
 
             "restaurant_loyalty":
                 np.clip(
-                    np.random.normal(
+                    rng.normal(
                         CONFIG["LOYALTY_MEAN"],
                         CONFIG["LOYALTY_STD"]
                     ),
@@ -70,7 +72,7 @@ def generate_customers(restaurants):
 
             "perk_affinity":
                 np.clip(
-                    np.random.normal(
+                    rng.normal(
                         CONFIG["PERK_AFFINITY_MEAN"],
                         CONFIG["PERK_AFFINITY_STD"]
                     ),
@@ -80,7 +82,7 @@ def generate_customers(restaurants):
 
             "urgency":
                 np.clip(
-                    np.random.normal(
+                    rng.normal(
                         CONFIG["URGENCY_MEAN"],
                         CONFIG["URGENCY_STD"]
                     ),
@@ -88,7 +90,7 @@ def generate_customers(restaurants):
                     1
                 ),
 
-            "group_size": np.random.choice(
+            "group_size": rng.choice(
                 [1, 2, 3, 4, 5, 6, 7],
                 p=[0.15, 0.35, 0.2, 0.12, 0.1, 0.05, 0.03]
             )

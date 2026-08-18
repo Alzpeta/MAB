@@ -6,8 +6,8 @@ from ..reservation import compute_expected_acceptance_probability
 
 class OraclePolicy:
 
-    def __init__(self, n_arms):
-        pass
+    def __init__(self, n_arms, rng=None):
+        del n_arms, rng
 
     def set_customer(self, customer):
         self.customer = customer
