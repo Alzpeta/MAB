@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Results - midrange</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 24px;
+      color: #222;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    table.results-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+    }
+    .results-table th {
+      background: #263238;
+      color: white;
+      padding: 8px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+    .results-table td {
+      border-bottom: 1px solid #ddd;
+      padding: 7px 8px;
+      white-space: nowrap;
+    }
+    .results-table tr:nth-child(even) {
+      background: #f6f8fa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Results - midrange</h1>
+  <table border="1" class="dataframe results-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>scenario</th>
+      <th>restaurant_tiers</th>
+      <th>agent</th>
+      <th>top_k</th>
+      <th>mean_reward</th>
+      <th>std_reward</th>
+      <th>ci95</th>
+      <th>min_reward</th>
+      <th>max_reward</th>
+      <th>improvement_vs_random_pct</th>
+      <th>rank</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>DecayEpsilon</td>
+      <td>1</td>
+      <td>0.1542</td>
+      <td>0.0039</td>
+      <td>0.0008</td>
+      <td>0.1439</td>
+      <td>0.1625</td>
+      <td>24.9771</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>EpsilonGreedy</td>
+      <td>1</td>
+      <td>0.1527</td>
+      <td>0.0037</td>
+      <td>0.0007</td>
+      <td>0.1444</td>
+      <td>0.1604</td>
+      <td>23.7171</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Thompson</td>
+      <td>1</td>
+      <td>0.1509</td>
+      <td>0.0034</td>
+      <td>0.0007</td>
+      <td>0.1412</td>
+      <td>0.1585</td>
+      <td>22.2383</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>UCB1</td>
+      <td>1</td>
+      <td>0.1419</td>
+      <td>0.0026</td>
+      <td>0.0005</td>
+      <td>0.1352</td>
+      <td>0.1480</td>
+      <td>15.0158</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Softmax</td>
+      <td>1</td>
+      <td>0.1391</td>
+      <td>0.0027</td>
+      <td>0.0005</td>
+      <td>0.1305</td>
+      <td>0.1449</td>
+      <td>12.7219</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Random</td>
+      <td>1</td>
+      <td>0.1234</td>
+      <td>0.0023</td>
+      <td>0.0004</td>
+      <td>0.1182</td>
+      <td>0.1284</td>
+      <td>0.0000</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>DecayEpsilon</td>
+      <td>2</td>
+      <td>0.2825</td>
+      <td>0.0041</td>
+      <td>0.0008</td>
+      <td>0.2693</td>
+      <td>0.2909</td>
+      <td>21.8908</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Thompson</td>
+      <td>2</td>
+      <td>0.2812</td>
+      <td>0.0034</td>
+      <td>0.0007</td>
+      <td>0.2716</td>
+      <td>0.2900</td>
+      <td>21.3059</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>EpsilonGreedy</td>
+      <td>2</td>
+      <td>0.2793</td>
+      <td>0.0042</td>
+      <td>0.0008</td>
+      <td>0.2674</td>
+      <td>0.2893</td>
+      <td>20.5205</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>UCB1</td>
+      <td>2</td>
+      <td>0.2675</td>
+      <td>0.0033</td>
+      <td>0.0006</td>
+      <td>0.2597</td>
+      <td>0.2758</td>
+      <td>15.4139</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Softmax</td>
+      <td>2</td>
+      <td>0.2573</td>
+      <td>0.0031</td>
+      <td>0.0006</td>
+      <td>0.2495</td>
+      <td>0.2655</td>
+      <td>11.0059</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Random</td>
+      <td>2</td>
+      <td>0.2318</td>
+      <td>0.0028</td>
+      <td>0.0005</td>
+      <td>0.2263</td>
+      <td>0.2386</td>
+      <td>0.0000</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>DecayEpsilon</td>
+      <td>3</td>
+      <td>0.3811</td>
+      <td>0.0041</td>
+      <td>0.0008</td>
+      <td>0.3733</td>
+      <td>0.3908</td>
+      <td>16.4264</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Thompson</td>
+      <td>3</td>
+      <td>0.3792</td>
+      <td>0.0037</td>
+      <td>0.0007</td>
+      <td>0.3677</td>
+      <td>0.3895</td>
+      <td>15.8672</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>EpsilonGreedy</td>
+      <td>3</td>
+      <td>0.3761</td>
+      <td>0.0036</td>
+      <td>0.0007</td>
+      <td>0.3674</td>
+      <td>0.3847</td>
+      <td>14.9077</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>UCB1</td>
+      <td>3</td>
+      <td>0.3719</td>
+      <td>0.0034</td>
+      <td>0.0007</td>
+      <td>0.3648</td>
+      <td>0.3798</td>
+      <td>13.6219</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Softmax</td>
+      <td>3</td>
+      <td>0.3538</td>
+      <td>0.0033</td>
+      <td>0.0007</td>
+      <td>0.3458</td>
+      <td>0.3620</td>
+      <td>8.0890</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td>midrange</td>
+      <td>midrange</td>
+      <td>Random</td>
+      <td>3</td>
+      <td>0.3273</td>
+      <td>0.0036</td>
+      <td>0.0007</td>
+      <td>0.3173</td>
+      <td>0.3350</td>
+      <td>0.0000</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>

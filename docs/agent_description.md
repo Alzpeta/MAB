@@ -8,9 +8,7 @@ The general flow is:
 2. The agent receives those indices and the number of options it may show, `k`.
 3. The agent selects up to `k` arms.
 4. The reservation environment simulates whether the customer accepts one of the displayed arms.
-5. Each displayed arm is updated with the reward implied by the customer's
-   choice: the accepted arm receives `1` and the other displayed arms receive
-   `0`.
+5. The accepted arm is updated with the observed reward.
 
 In this project, an arm means one reservation option from `ALL_OPTIONS`.
 
@@ -64,7 +62,7 @@ It initializes:
 self.counts = np.zeros(n_arms)
 ```
 
-`counts` tracks how many times each arm has been displayed and updated.
+`counts` tracks how many times each arm has been selected and updated.
 
 It also initializes:
 
@@ -78,7 +76,7 @@ With the current default initial estimate, all arms start with the same expected
 
 ## `BaseAgent.update`
 
-`update(arm, reward)` updates the running average reward for a displayed arm.
+`update(arm, reward)` updates the running average reward for the accepted arm.
 
 The update logic is:
 
@@ -180,7 +178,7 @@ The idea is:
 It starts with:
 
 ```python
-epsilon_0 = 0.1
+epsilon_0 = 1.0
 min_epsilon = 0.01
 self.t = 1
 ```
