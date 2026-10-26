@@ -3,6 +3,7 @@ from .epsilon import EpsilonGreedyAgent, DecayEpsilonAgent
 from .ucb import UCB1Agent
 from .thompson import ThompsonSamplingAgent
 from .softmax import SoftmaxAgent
+from .oracle import OraclePolicy
 
 AGENTS = {
 
@@ -16,7 +17,9 @@ AGENTS = {
 
     "Thompson": ThompsonSamplingAgent,
 
-    "Softmax": SoftmaxAgent
+    "Softmax": SoftmaxAgent,
+
+    "Oracle": OraclePolicy,
 }
 
 __all__ = [
@@ -26,5 +29,6 @@ __all__ = [
     "UCB1Agent",
     "ThompsonSamplingAgent",
     "SoftmaxAgent",
+    "OraclePolicy",
     "AGENTS",
 ]

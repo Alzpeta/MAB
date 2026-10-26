@@ -3,9 +3,9 @@ import numpy as np
 
 class UCB1Agent(BaseAgent):
 
-    def __init__(self, n_arms, c=1):
+    def __init__(self, n_arms, c=1, rng=None):
 
-        super().__init__(n_arms)
+        super().__init__(n_arms, rng=rng)
 
         self.c = c
         self.t = 1

@@ -52,8 +52,42 @@ def test_random_agent_does_not_request_more_arms_than_available(monkeypatch):
     assert selected.tolist() == [2, 1]
 
 
+def test_oracle_policy_ranks_by_expected_probability_without_learning(
+    monkeypatch,
+):
+    policy = mab.OraclePolicy(n_arms=5)
+    customer = {"customer_id": 1}
+    policy.set_customer(customer)
+    available_indices = np.array([
+        mab.OPTION_NAMES.index("same_day_60min"),
+        mab.OPTION_NAMES.index("discount_10pct"),
+        mab.OPTION_NAMES.index("next_day_same_time"),
+    ])
+    expected_probabilities = {
+        "same_day_60min": 0.12,
+        "discount_10pct": 0.28,
+        "next_day_same_time": 0.21,
+    }
+
+    monkeypatch.setattr(
+        "source.agents.oracle.compute_expected_acceptance_probability",
+        lambda actual_customer, option_name: expected_probabilities[option_name],
+    )
+
+    assert policy.select_arms(available_indices, k=2).tolist() == [
+        mab.OPTION_NAMES.index("discount_10pct"),
+        mab.OPTION_NAMES.index("next_day_same_time"),
+    ]
+
+    policy.update(arm=available_indices[0], reward=1)
+
+    assert policy.select_arms(available_indices, k=1).tolist() == [
+        mab.OPTION_NAMES.index("discount_10pct")
+    ]
+
+
 def test_epsilon_greedy_agent_exploits_highest_available_values():
-    agent = mab.EpsilonGreedyAgent(n_arms=5)
+    agent = mab.EpsilonGreedyAgent(n_arms=5, epsilon=0)
     agent.values = np.array([0.1, 0.8, 0.4, 0.9, 0.2])
     available_indices = np.array([0, 1, 2, 4])
 
@@ -80,15 +114,15 @@ def test_epsilon_greedy_agent_explores_when_random_value_is_below_epsilon(
     assert selected.tolist() == [2, 0]
 
 
-def test_decay_epsilon_agent_increments_time_and_exploits_when_not_exploring(
-    monkeypatch,
-):
-    agent = mab.DecayEpsilonAgent(n_arms=5)
+def test_decay_epsilon_agent_increments_time_and_exploits_when_not_exploring():
+    agent = mab.DecayEpsilonAgent(
+        n_arms=5,
+        epsilon_0=0,
+        min_epsilon=0,
+    )
     agent.values = np.array([0.1, 0.8, 0.4, 0.9, 0.2])
     agent.t = 10000
     available_indices = np.array([0, 1, 2, 4])
-
-    monkeypatch.setattr(mab.np.random, "rand", lambda: 0.5)
 
     selected = agent.select_arms(available_indices, k=2)
 

@@ -2,15 +2,16 @@ import numpy as np
 
 class ThompsonSamplingAgent:
 
-    def __init__(self, n_arms):
+    def __init__(self, n_arms, rng=None):
 
         self.alpha = np.ones(n_arms)
 
         self.beta = np.ones(n_arms)
+        self.rng = np.random if rng is None else rng
 
     def select_arms(self, available_indices, k):
 
-        samples = np.random.beta(
+        samples = self.rng.beta(
             self.alpha,
             self.beta
         )

@@ -229,8 +229,9 @@ RESTAURANT_CONFIGS = {
 }
 
 
-def generate_restaurants(restaurant_tiers=None):
+def generate_restaurants(restaurant_tiers=None, rng=None):
     restaurants = []
+    rng = np.random if rng is None else rng
 
     restaurant_tiers = (
         set(restaurant_tiers)
@@ -283,7 +284,7 @@ def generate_restaurants(restaurant_tiers=None):
                         CONFIG["WEEKEND_OCCUPANCY_BOOST"]
                     )
 
-                occupancy_ratio += np.random.normal(
+                occupancy_ratio += rng.normal(
                     0,
                     0.08
                 )

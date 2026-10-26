@@ -14,6 +14,7 @@ def make_customer(**overrides):
         "restaurant_loyalty": 0.7,
         "perk_affinity": 0.5,
         "urgency": 0.3,
+        "future_visit_frustration": 0.45,
         "requested_hour": 12,
         "group_size": 2,
     }
@@ -23,6 +24,24 @@ def make_customer(**overrides):
 
 def sigmoid(value):
     return 1 / (1 + math.exp(-value))
+
+
+def test_expected_acceptance_probability_does_not_sample_future_noise(monkeypatch):
+    monkeypatch.setattr(
+        mab.np.random,
+        "normal",
+        lambda mean, std: (_ for _ in ()).throw(
+            AssertionError("Oracle must not sample future noise")
+        ),
+    )
+
+    probability = mab.compute_expected_acceptance_probability(
+        make_customer(),
+        "discount_10pct",
+    )
+
+    assert mab.CONFIG["MIN_ACCEPTANCE_PROBABILITY"] <= probability
+    assert probability <= mab.CONFIG["MAX_ACCEPTANCE_PROBABILITY"]
 
 
 def test_compute_acceptance_probability_matches_expected_formula_without_noise(

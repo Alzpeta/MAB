@@ -206,10 +206,10 @@ This is the average acceptance reward across all customers in the run.
 
 ## Agent Update
 
-The agent is updated for displayed arms after each customer interaction:
+The agent is updated only for arms evaluated by the customer-choice process:
 
 ```python
-for arm in displayed_arms:
+for arm in evaluated_arms:
     if result["chosen_arm"] is None:
         agent.update(arm, 0)
     elif arm == result["chosen_arm"]:
@@ -219,9 +219,9 @@ for arm in displayed_arms:
         agent.update(arm, 0)
 ```
 
-If a customer rejects all displayed options, every displayed arm receives an update with reward `0`.
+If a customer rejects all evaluated options, every evaluated arm receives an update with reward `0`.
 
-If a customer accepts an option, displayed arms before the accepted option receive reward `0`, the accepted arm receives reward `1`, and the update loop stops.
+If a customer accepts an option, evaluated arms before the accepted option receive reward `0`, the accepted arm receives reward `1`, and the update loop stops.
 
 This happens in `source/experiment.py`:
 
@@ -232,7 +232,7 @@ reward = result["reward"]
 
 rewards.append(reward)
 
-for arm in displayed_arms:
+for arm in evaluated_arms:
     if result["chosen_arm"] is None:
         agent.update(arm, 0)
     elif arm == result["chosen_arm"]:
@@ -242,7 +242,7 @@ for arm in displayed_arms:
         agent.update(arm, 0)
 ```
 
-The reward is always appended to the experiment-level results. Agent learning is based on the displayed arms and the first accepted arm, if any.
+The reward is always appended to the experiment-level results. Agent learning is based on evaluated arms and the first accepted arm, if any.
 
 The related return value comes from `source/reservation.py`. If the customer does not accept any displayed option, `customer_choice` returns:
 
@@ -250,7 +250,7 @@ The related return value comes from `source/reservation.py`. If the customer doe
 return None, 0
 ```
 
-So a full rejection becomes `chosen_arm = None` and `reward = 0`. The `0` is counted in the experiment average and is also used to update all displayed arms.
+So a full rejection becomes `chosen_arm = None` and `reward = 0`. The `0` is counted in the experiment average and is also used to update all evaluated arms.
 
 
 ## Done Condition
@@ -267,23 +267,24 @@ if result["done"]:
 It tracks:
 
 ```python
-shown_counts = np.zeros(N_ARMS)
+examined_counts = np.zeros(N_ARMS)
 accepted_counts = np.zeros(N_ARMS)
 ```
 
-`shown_counts` counts how many times each arm was displayed.
+`examined_counts` counts how many times each arm was evaluated by the
+customer-choice process.
 
 `accepted_counts` counts how many times each arm was accepted.
 
 ## Shown Counts
 
-For each displayed arm, the function increments:
+For each evaluated arm, the function increments:
 
 ```python
-shown_counts[arm] += 1
+examined_counts[arm] += 1
 ```
 
-This records exposure: how often the customer saw the option.
+This records examination: how often the customer-choice process evaluated the option.
 
 ## Accepted Counts
 
@@ -305,17 +306,17 @@ Each row contains:
 
 - `option_name`
 - `option_category`
-- `shown_count`
+- `examined_count`
 - `accepted_count`
 - `acceptance_rate`
 
 The acceptance rate is:
 
 ```python
-accepted_count / shown_count
+accepted_count / examined_count
 ```
 
-If an option was never shown, its acceptance rate is stored as `np.nan`.
+If an option was never examined, its acceptance rate is stored as `np.nan`.
 
 The function returns:
 

@@ -1,7 +1,0 @@
-scenario,option_category,shown_count,accepted_count,acceptance_rate
-midrange,discount_only,19741561.0,2936783.0,0.14876143786198062
-midrange,perk_only,23046750.0,3280506.0,0.14234137134303101
-midrange,time_discount,5041541.0,529069.0,0.1049419215275647
-midrange,time_discount_perk,9750699.0,1263338.0,0.1295638394744828
-midrange,time_only,5937137.0,556499.0,0.09373187783943675
-midrange,time_perk,8320132.0,761556.0,0.09153172089096663

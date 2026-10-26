@@ -3,9 +3,9 @@ from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 import json
-import os
 import sys
 import time
+import zlib
 
 from source.restaurants import generate_restaurants, RESTAURANT_CONFIGS
 from source.customers import generate_customers
@@ -15,22 +15,6 @@ from source.options import ALL_OPTIONS
 from source.config import CONFIG
 
 DEFAULT_CONFIG = deepcopy(CONFIG)
-
-Path("outputs/matplotlib_cache").mkdir(parents=True, exist_ok=True)
-os.environ.setdefault(
-    "MPLCONFIGDIR",
-    str(Path("outputs/matplotlib_cache").resolve())
-)
-Path("outputs/cache").mkdir(parents=True, exist_ok=True)
-os.environ.setdefault(
-    "XDG_CACHE_HOME",
-    str(Path("outputs/cache").resolve())
-)
-
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -42,9 +26,9 @@ SCENARIOS = {
 }
 
 DEFAULT_RUN_CONFIG_OVERRIDES = {
-    "N_CUSTOMERS": 20000,
+    "N_CUSTOMERS": 2000,
     "N_RUNS": 100,
-    "N_SHOWN_OPTIONS_LIST": [1, 2, 3, 4, 5, 6, 7],
+    "N_SHOWN_OPTIONS_LIST": [3],
     "SEED": 33,
 }
 
@@ -54,127 +38,127 @@ REQUESTED_EXPERIMENTS = [
         "description": "Baseline configuration; evaluate k from 1 to 7.",
         "config_overrides": {},
     },
-    {
-        "name": "extended_operating_hours",
-        "description": "Extend opening hours from 11:00-23:00 to 09:00-24:00.",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
-            "OPEN_HOUR": 9,
-            "CLOSE_HOUR": 24,
-        },
-    },
-    {
-        "name": "much_lower_occupancy",
-        "description": "Use the Much Lower occupancy scenario from the paper.",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1],
-            "TIER_BASE_OCCUPANCY": {
-                "budget": 0.15,
-                "midrange": 0.30,
-                "premium": 0.45,
-            },
-        },
-    },
-    {
-        "name": "lower_occupancy",
-        "description": "Use the Lower occupancy scenario from the paper.",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1],
-            "TIER_BASE_OCCUPANCY": {
-                "budget": 0.30,
-                "midrange": 0.45,
-                "premium": 0.60,
-            },
-        },
-    },
-    {
-        "name": "higher_occupancy",
-        "description": "Use the Higher occupancy scenario from the paper.",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1],
-            "TIER_BASE_OCCUPANCY": {
-                "budget": 0.60,
-                "midrange": 0.75,
-                "premium": 0.90,
-            },
-        },
-    },
-    {
-        "name": "much_higher_occupancy",
-        "description": "Use the Much Higher occupancy scenario from the paper.",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1],
-            "TIER_BASE_OCCUPANCY": {
-                "budget": 0.75,
-                "midrange": 0.90,
-                "premium": 0.98,
-            },
-        },
-    },
-    {
-        "name": "very_low_decision_uncertainty",
-        "description": "Use low decision uncertainty (sigma = 0.1).",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
-            "NOISE_STD": 0.1,
-        },
-    },
-    {
-        "name": "low_decision_uncertainty",
-        "description": "Use low decision uncertainty (sigma = 0.1).",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
-            "NOISE_STD": 0.3,
-        },
-    },
-    {
-        "name": "high_decision_uncertainty",
-        "description": "Use high decision uncertainty (sigma = 1.0).",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
-            "NOISE_STD": 1.0,
-        },
-    },
-    {
-        "name": "very_high_decision_uncertainty",
-        "description": "Use very high decision uncertainty (sigma = 1.5).",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
-            "NOISE_STD": 1.5,
-        },
-    },
-    {
-        "name": "very_pessimistic_customer_attitude",
-        "description": "Use very pessimistic customer attitude (U0 = -3.5).",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
-            "BASE_UTILITY": -3.5,
-        },
-    },
-    {
-        "name": "pessimistic_customer_attitude",
-        "description": "Use pessimistic customer attitude (U0 = -2.5).",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
-            "BASE_UTILITY": -2.5,
-        },
-    },
-    {
-        "name": "optimistic_customer_attitude",
-        "description": "Use optimistic customer attitude (U0 = -1.0).",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
-            "BASE_UTILITY": -1.0,
-        },
-    },
-    {
-        "name": "very_optimistic_customer_attitude",
-        "description": "Use very optimistic customer attitude (U0 = 0.0).",
-        "config_overrides": {
-            "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
-            "BASE_UTILITY": 0.0,
-        },
-    },
+    # {
+    #     "name": "extended_operating_hours",
+    #     "description": "Extend opening hours from 11:00-23:00 to 09:00-24:00.",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    #         "OPEN_HOUR": 9,
+    #         "CLOSE_HOUR": 24,
+    #     },
+    # },
+    # {
+    #     "name": "much_lower_occupancy",
+    #     "description": "Use the Much Lower occupancy scenario from the paper.",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1],
+    #         "TIER_BASE_OCCUPANCY": {
+    #             "budget": 0.15,
+    #             "midrange": 0.30,
+    #             "premium": 0.45,
+    #         },
+    #     },
+    # },
+    # {
+    #     "name": "lower_occupancy",
+    #     "description": "Use the Lower occupancy scenario from the paper.",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1],
+    #         "TIER_BASE_OCCUPANCY": {
+    #             "budget": 0.30,
+    #             "midrange": 0.45,
+    #             "premium": 0.60,
+    #         },
+    #     },
+    # },
+    # {
+    #     "name": "higher_occupancy",
+    #     "description": "Use the Higher occupancy scenario from the paper.",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1],
+    #         "TIER_BASE_OCCUPANCY": {
+    #             "budget": 0.60,
+    #             "midrange": 0.75,
+    #             "premium": 0.90,
+    #         },
+    #     },
+    # },
+    # {
+    #     "name": "much_higher_occupancy",
+    #     "description": "Use the Much Higher occupancy scenario from the paper.",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1],
+    #         "TIER_BASE_OCCUPANCY": {
+    #             "budget": 0.75,
+    #             "midrange": 0.90,
+    #             "premium": 0.98,
+    #         },
+    #     },
+    # },
+    # {
+    #     "name": "very_low_decision_uncertainty",
+    #     "description": "Use low decision uncertainty (sigma = 0.1).",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    #         "NOISE_STD": 0.1,
+    #     },
+    # },
+    # {
+    #     "name": "low_decision_uncertainty",
+    #     "description": "Use low decision uncertainty (sigma = 0.1).",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    #         "NOISE_STD": 0.3,
+    #     },
+    # },
+    # {
+    #     "name": "high_decision_uncertainty",
+    #     "description": "Use high decision uncertainty (sigma = 1.0).",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    #         "NOISE_STD": 1.0,
+    #     },
+    # },
+    # {
+    #     "name": "very_high_decision_uncertainty",
+    #     "description": "Use very high decision uncertainty (sigma = 1.5).",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    #         "NOISE_STD": 1.5,
+    #     },
+    # },
+    # {
+    #     "name": "very_pessimistic_customer_attitude",
+    #     "description": "Use very pessimistic customer attitude (U0 = -3.5).",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    #         "BASE_UTILITY": -3.5,
+    #     },
+    # },
+    # {
+    #     "name": "pessimistic_customer_attitude",
+    #     "description": "Use pessimistic customer attitude (U0 = -2.5).",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    #         "BASE_UTILITY": -2.5,
+    #     },
+    # },
+    # {
+    #     "name": "optimistic_customer_attitude",
+    #     "description": "Use optimistic customer attitude (U0 = -1.0).",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    #         "BASE_UTILITY": -1.0,
+    #     },
+    # },
+    # {
+    #     "name": "very_optimistic_customer_attitude",
+    #     "description": "Use very optimistic customer attitude (U0 = 0.0).",
+    #     "config_overrides": {
+    #         "N_SHOWN_OPTIONS_LIST": [1, 2, 3],
+    #         "BASE_UTILITY": 0.0,
+    #     },
+    # },
 ]
 
 
@@ -267,6 +251,81 @@ def print_progress(label, current, total, start_time):
         sys.stdout.flush()
 
 
+# zmena zacatek
+def summarize_confidence_interval(values):
+    values = np.asarray(values, dtype=float)
+    mean_value = values.mean()
+
+    if len(values) < 2:
+        return mean_value, 0.0, mean_value, mean_value
+
+    standard_deviation = values.std(ddof=1)
+    ci95 = 1.96 * standard_deviation / np.sqrt(len(values))
+
+    return (
+        mean_value,
+        ci95,
+        mean_value - ci95,
+        mean_value + ci95,
+    )
+
+
+def add_paired_difference_confidence_intervals(
+    results_df,
+    run_results_df,
+    baseline_agent,
+    column_prefix,
+):
+    baseline_runs = run_results_df[
+        run_results_df["agent"] == baseline_agent
+    ]
+
+    for index, row in results_df.iterrows():
+        candidate_runs = run_results_df[
+            (run_results_df["scenario"] == row["scenario"])
+            & (run_results_df["restaurant_tiers"] == row["restaurant_tiers"])
+            & (run_results_df["top_k"] == row["top_k"])
+            & (run_results_df["agent"] == row["agent"])
+        ][["run", "reward"]]
+        matching_baseline_runs = baseline_runs[
+            (baseline_runs["scenario"] == row["scenario"])
+            & (baseline_runs["restaurant_tiers"] == row["restaurant_tiers"])
+            & (baseline_runs["top_k"] == row["top_k"])
+        ][["run", "reward"]]
+        paired_runs = candidate_runs.merge(
+            matching_baseline_runs,
+            on="run",
+            suffixes=("_candidate", "_baseline"),
+        )
+
+        if paired_runs.empty:
+            mean_difference = np.nan
+            ci95 = np.nan
+            ci95_lower = np.nan
+            ci95_upper = np.nan
+        else:
+            differences = (
+                paired_runs["reward_candidate"]
+                - paired_runs["reward_baseline"]
+            )
+            (
+                mean_difference,
+                ci95,
+                ci95_lower,
+                ci95_upper,
+            ) = summarize_confidence_interval(differences)
+
+        results_df.loc[index, f"{column_prefix}_mean_difference"] = (
+            mean_difference
+        )
+        results_df.loc[index, f"{column_prefix}_ci95"] = ci95
+        results_df.loc[index, f"{column_prefix}_ci95_lower"] = ci95_lower
+        results_df.loc[index, f"{column_prefix}_ci95_upper"] = ci95_upper
+
+    return results_df
+# zmena konec
+
+
 def make_output_dir(run_name=None):
     if run_name is None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -300,6 +359,7 @@ def customers_to_dataframe(customers):
             "restaurant_loyalty": customer["restaurant_loyalty"],
             "perk_affinity": customer["perk_affinity"],
             "urgency": customer["urgency"],
+            "future_visit_frustration": customer["future_visit_frustration"],
             "group_size": customer["group_size"],
         })
 
@@ -327,6 +387,9 @@ def run_scenario(scenario_name, restaurant_tiers):
 
     run_result_rows = []
     all_option_results = []
+    # zmena zacatek
+    all_position_results = []
+    # zmena konec
 
     random_reward_by_k = {}
 
@@ -347,21 +410,34 @@ def run_scenario(scenario_name, restaurant_tiers):
             )
 
             for run in range(CONFIG["N_RUNS"]):
-                np.random.seed(CONFIG["SEED"] + run)
+                instance_seed = CONFIG["SEED"] + run
+                outcome_seed = CONFIG["SEED"] + 10000 + run
+                policy_seed = zlib.crc32(
+                    f"{CONFIG['SEED']}:{run}:{agent_name}".encode("utf-8")
+                )
+                instance_rng = np.random.default_rng(instance_seed)
+                agent_rng = np.random.default_rng(policy_seed)
 
-                restaurants = generate_restaurants(restaurant_tiers)
-                customers = generate_customers(restaurants)
+                restaurants = generate_restaurants(
+                    restaurant_tiers,
+                    rng=instance_rng,
+                )
+                customers = generate_customers(restaurants, rng=instance_rng)
 
                 if sample_restaurants is None:
                     sample_restaurants = restaurants
                     sample_customers = customers
 
-                np.random.seed(CONFIG["SEED"] + 10000 + run)
-
-                mean_reward, option_stats_df = run_experiment_with_option_stats(
+                (
+                    mean_reward,
+                    option_stats_df,
+                    position_stats_df,
+                ) = run_experiment_with_option_stats(
                     agent_class,
                     k,
-                    customers
+                    customers,
+                    agent_rng=agent_rng,
+                    outcome_seed=outcome_seed,
                 )
 
                 run_rewards.append(mean_reward)
@@ -376,6 +452,9 @@ def run_scenario(scenario_name, restaurant_tiers):
                     "agent": agent_name,
                     "top_k": k,
                     "run": run,
+                    "instance_seed": instance_seed,
+                    "policy_seed": policy_seed,
+                    "outcome_seed": outcome_seed,
                     "reward": mean_reward,
                 })
 
@@ -390,6 +469,19 @@ def run_scenario(scenario_name, restaurant_tiers):
                 option_stats_df["run"] = run
                 all_option_results.append(option_stats_df)
 
+                # zmena zacatek
+                position_stats_df["scenario"] = scenario_name
+                position_stats_df["restaurant_tiers"] = (
+                    "all"
+                    if restaurant_tiers is None
+                    else ", ".join(restaurant_tiers)
+                )
+                position_stats_df["agent"] = agent_name
+                position_stats_df["top_k"] = k
+                position_stats_df["run"] = run
+                all_position_results.append(position_stats_df)
+                # zmena konec
+
                 print_progress(
                     progress_label,
                     run + 1,
@@ -397,9 +489,15 @@ def run_scenario(scenario_name, restaurant_tiers):
                     progress_started_at
                 )
 
-            mean_reward = np.mean(run_rewards)
-            std_reward = np.std(run_rewards)
-            ci95 = 1.96 * std_reward / np.sqrt(CONFIG["N_RUNS"])
+            # zmena zacatek
+            (
+                mean_reward,
+                ci95,
+                ci95_lower,
+                ci95_upper,
+            ) = summarize_confidence_interval(run_rewards)
+            std_reward = np.std(run_rewards, ddof=1) if len(run_rewards) > 1 else 0
+            # zmena konec
 
             if agent_name == "Random":
                 random_reward_by_k[k] = mean_reward
@@ -426,6 +524,10 @@ def run_scenario(scenario_name, restaurant_tiers):
                 "mean_reward": mean_reward,
                 "std_reward": std_reward,
                 "ci95": ci95,
+                # zmena zacatek
+                "ci95_lower": ci95_lower,
+                "ci95_upper": ci95_upper,
+                # zmena konec
                 "improvement_vs_random_pct": improvement,
             })
 
@@ -485,17 +587,30 @@ def run_scenario(scenario_name, restaurant_tiers):
     for (scenario, tiers, agent, top_k), group in run_results_df.groupby(
         ["scenario", "restaurant_tiers", "agent", "top_k"]
     ):
-        rewards = group["reward"]
+        # zmena zacatek
+        (
+            mean_reward,
+            ci95,
+            ci95_lower,
+            ci95_upper,
+        ) = summarize_confidence_interval(group["reward"])
+        # zmena konec
         all_results.append({
             "scenario": scenario,
             "restaurant_tiers": tiers,
             "agent": agent,
             "top_k": top_k,
-            "mean_reward": rewards.mean(),
-            "std_reward": rewards.std(ddof=0),
-            "ci95": 1.96 * rewards.std(ddof=0) / np.sqrt(CONFIG["N_RUNS"]),
-            "min_reward": rewards.min(),
-            "max_reward": rewards.max(),
+            "mean_reward": mean_reward,
+            # zmena zacatek
+            "std_reward": (
+                group["reward"].std(ddof=1) if len(group) > 1 else 0
+            ),
+            "ci95": ci95,
+            "ci95_lower": ci95_lower,
+            "ci95_upper": ci95_upper,
+            # zmena konec
+            "min_reward": group["reward"].min(),
+            "max_reward": group["reward"].max(),
         })
 
     results_df = pd.DataFrame(all_results)
@@ -516,6 +631,13 @@ def run_scenario(scenario_name, restaurant_tiers):
                 (row["mean_reward"] - random_reward)
                 / random_reward
             ) * 100
+
+    results_df = add_paired_difference_confidence_intervals(
+        results_df,
+        run_results_df,
+        "Random",
+        "vs_random",
+    )
 
     results_df = results_df.sort_values(
         ["scenario", "top_k", "mean_reward"],
@@ -542,23 +664,56 @@ def run_scenario(scenario_name, restaurant_tiers):
             ],
             as_index=False
         )
-        [["shown_count", "accepted_count"]]
+        [["examined_count", "accepted_count"]]
         .sum()
     )
     option_summary_df["acceptance_rate"] = (
         option_summary_df["accepted_count"]
-        / option_summary_df["shown_count"]
+        / option_summary_df["examined_count"]
     )
     option_summary_df["acceptance_rate"] = (
         option_summary_df["acceptance_rate"]
         .replace([np.inf, -np.inf], np.nan)
     )
 
+    # zmena zacatek
+    position_results_df = pd.concat(all_position_results, ignore_index=True)
+    position_summary_df = (
+        position_results_df
+        .groupby(
+            [
+                "scenario",
+                "restaurant_tiers",
+                "agent",
+                "top_k",
+                "position",
+            ],
+            as_index=False
+        )
+        [[
+            "position_examined_count",
+            "position_accepted_count",
+            "abandoned_after_position_count",
+        ]]
+        .sum()
+    )
+    position_summary_df["position_acceptance_rate"] = (
+        position_summary_df["position_accepted_count"]
+        / position_summary_df["position_examined_count"]
+    )
+    position_summary_df["position_acceptance_rate"] = (
+        position_summary_df["position_acceptance_rate"]
+        .replace([np.inf, -np.inf], np.nan)
+    )
+    # zmena konec
+
     return (
         results_df,
         option_summary_df,
         restaurants_to_dataframe(sample_restaurants),
         customers_to_dataframe(sample_customers),
+        position_summary_df,
+        run_results_df,
     )
 
 
@@ -584,376 +739,6 @@ def save_config(
         json.dump(config_output, file, indent=2, ensure_ascii=False)
 
 
-def save_pretty_table(df, output_path, title):
-    display_df = df.copy()
-
-    for column in display_df.columns:
-
-        if pd.api.types.is_float_dtype(display_df[column]):
-            display_df[column] = display_df[column].map(
-                lambda value: "" if pd.isna(value) else f"{value:.4f}"
-            )
-
-    html_table = display_df.to_html(index=False, classes="results-table")
-
-    html = f"""<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>{title}</title>
-  <style>
-    body {{
-      font-family: Arial, sans-serif;
-      margin: 24px;
-      color: #222;
-    }}
-    h1 {{
-      font-size: 22px;
-      margin-bottom: 16px;
-    }}
-    table.results-table {{
-      border-collapse: collapse;
-      width: 100%;
-      font-size: 13px;
-    }}
-    .results-table th {{
-      background: #263238;
-      color: white;
-      padding: 8px;
-      text-align: left;
-      position: sticky;
-      top: 0;
-    }}
-    .results-table td {{
-      border-bottom: 1px solid #ddd;
-      padding: 7px 8px;
-      white-space: nowrap;
-    }}
-    .results-table tr:nth-child(even) {{
-      background: #f6f8fa;
-    }}
-  </style>
-</head>
-<body>
-  <h1>{title}</h1>
-  {html_table}
-</body>
-</html>
-"""
-
-    output_path.write_text(html, encoding="utf-8")
-
-
-def draw_heatmap(data, title, output_path, value_format=".3f"):
-    fig_width = max(8, len(data.columns) * 1.4)
-    fig_height = max(5, len(data.index) * 0.6)
-
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    values = data.to_numpy(dtype=float)
-    masked_values = np.ma.masked_invalid(values)
-
-    image = ax.imshow(masked_values, aspect="auto", cmap="viridis")
-    ax.set_xticks(np.arange(len(data.columns)))
-    ax.set_yticks(np.arange(len(data.index)))
-    ax.set_xticklabels(data.columns)
-    ax.set_yticklabels(data.index)
-
-    for row_index in range(values.shape[0]):
-        for column_index in range(values.shape[1]):
-
-            value = values[row_index, column_index]
-
-            if pd.isna(value):
-                label = ""
-            else:
-                label = format(value, value_format)
-
-            ax.text(
-                column_index,
-                row_index,
-                label,
-                ha="center",
-                va="center",
-                color="white",
-                fontsize=9
-            )
-
-    ax.set_title(title)
-    ax.set_xlabel("TOP-K")
-    ax.set_ylabel("Agent")
-    fig.colorbar(image, ax=ax)
-    fig.tight_layout()
-    fig.savefig(output_path)
-    plt.close(fig)
-
-
-def plot_scenario_results(results_df, scenario_name, output_dir):
-    plt.figure(figsize=(10, 6))
-
-    for agent_name in results_df["agent"].unique():
-        subset = results_df[results_df["agent"] == agent_name]
-
-        plt.plot(
-            subset["top_k"],
-            subset["mean_reward"],
-            marker="o",
-            label=agent_name
-        )
-
-    plt.xlabel("Number of shown alternatives (TOP-K)")
-    plt.ylabel("Mean acceptance reward")
-    plt.title(f"Bandit strategy comparison - {scenario_name}")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig(output_dir / f"{scenario_name}_strategy_comparison.png")
-    plt.close()
-
-
-def plot_result_tables(results_df, scenario_name, output_dir):
-    reward_pivot = results_df.pivot(
-        index="agent",
-        columns="top_k",
-        values="mean_reward"
-    )
-    improvement_pivot = results_df.pivot(
-        index="agent",
-        columns="top_k",
-        values="improvement_vs_random_pct"
-    )
-    rank_pivot = results_df.pivot(
-        index="agent",
-        columns="top_k",
-        values="rank"
-    )
-
-    draw_heatmap(
-        reward_pivot,
-        f"Mean reward - {scenario_name}",
-        output_dir / f"{scenario_name}_mean_reward_heatmap.png"
-    )
-    draw_heatmap(
-        improvement_pivot,
-        f"Improvement vs Random (%) - {scenario_name}",
-        output_dir / f"{scenario_name}_improvement_heatmap.png",
-        value_format=".1f"
-    )
-    draw_heatmap(
-        rank_pivot,
-        f"Rank - {scenario_name}",
-        output_dir / f"{scenario_name}_rank_heatmap.png",
-        value_format=".0f"
-    )
-
-
-def plot_customer_sample(customers_df, scenario_name, output_dir):
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
-
-    customers_df["requested_hour"].plot(
-        kind="hist",
-        bins=range(
-            CONFIG["OPEN_HOUR"],
-            CONFIG["CLOSE_HOUR"] + 1
-        ),
-        ax=axes[0, 0],
-        title="Requested hour"
-    )
-
-    customers_df["group_size"].plot(
-        kind="hist",
-        bins=range(1, 8),
-        ax=axes[0, 1],
-        title="Group size"
-    )
-
-    affinity_columns = [
-        "discount_affinity",
-        "time_flexibility",
-        "restaurant_loyalty",
-        "perk_affinity",
-        "urgency",
-    ]
-
-    customers_df[affinity_columns].mean().plot(
-        kind="bar",
-        ax=axes[1, 0],
-        title="Average customer attributes"
-    )
-
-    customers_df["restaurant_tier"].value_counts().plot(
-        kind="bar",
-        ax=axes[1, 1],
-        title="Customers by restaurant tier"
-    )
-
-    fig.suptitle(f"Customer sample - {scenario_name}")
-    fig.tight_layout()
-    fig.savefig(output_dir / f"{scenario_name}_customer_sample.png")
-    plt.close(fig)
-
-
-def plot_option_category_results(option_results_df, scenario_name, output_dir):
-    category_df = (
-        option_results_df
-        .groupby("option_category", as_index=False)
-        [["shown_count", "accepted_count"]]
-        .sum()
-    )
-    category_df["acceptance_rate"] = (
-            category_df["accepted_count"]
-            / category_df["shown_count"]
-    )
-    category_df["acceptance_rate"] = (
-        category_df["acceptance_rate"]
-        .replace([np.inf, -np.inf], np.nan)
-    )
-    category_df = category_df.sort_values(
-        "acceptance_rate",
-        ascending=False
-    )
-
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-
-    axes[0].bar(
-        category_df["option_category"],
-        category_df["acceptance_rate"]
-    )
-    axes[0].set_title("Acceptance rate by option category")
-    axes[0].set_ylabel("Accepted / shown")
-    axes[0].tick_params(axis="x", rotation=35)
-
-    axes[1].bar(
-        category_df["option_category"],
-        category_df["shown_count"]
-    )
-    axes[1].set_title("Shown count by option category")
-    axes[1].set_ylabel("Shown count")
-    axes[1].tick_params(axis="x", rotation=35)
-
-    fig.suptitle(f"Option categories - {scenario_name}")
-    fig.tight_layout()
-    fig.savefig(output_dir / f"{scenario_name}_option_categories.png")
-    plt.close(fig)
-
-
-def plot_top_options(option_results_df, scenario_name, output_dir):
-    option_df = (
-        option_results_df
-        .groupby(["option_name", "option_category"], as_index=False)
-        [["shown_count", "accepted_count"]]
-        .sum()
-    )
-    option_df["acceptance_rate"] = (
-            option_df["accepted_count"]
-            / option_df["shown_count"]
-    )
-    option_df["acceptance_rate"] = (
-        option_df["acceptance_rate"]
-        .replace([np.inf, -np.inf], np.nan)
-    )
-    option_df = option_df[
-        option_df["shown_count"] > 0
-        ].sort_values(
-        ["accepted_count", "acceptance_rate"],
-        ascending=False
-    ).head(15)
-
-    labels = option_df["option_name"]
-
-    fig, axes = plt.subplots(1, 2, figsize=(15, 7))
-
-    axes[0].barh(labels, option_df["accepted_count"])
-    axes[0].invert_yaxis()
-    axes[0].set_title("Top options by accepted count")
-    axes[0].set_xlabel("Accepted count")
-
-    axes[1].barh(labels, option_df["acceptance_rate"])
-    axes[1].invert_yaxis()
-    axes[1].set_title("Acceptance rate for top options")
-    axes[1].set_xlabel("Accepted / shown")
-
-    fig.suptitle(f"Best performing options - {scenario_name}")
-    fig.tight_layout()
-    fig.savefig(output_dir / f"{scenario_name}_top_options.png")
-    plt.close(fig)
-
-
-def plot_option_agent_heatmap(option_results_df, scenario_name, output_dir):
-    category_agent_df = (
-        option_results_df
-        .groupby(["option_category", "agent"], as_index=False)
-        [["shown_count", "accepted_count"]]
-        .sum()
-    )
-    category_agent_df["acceptance_rate"] = (
-            category_agent_df["accepted_count"]
-            / category_agent_df["shown_count"]
-    )
-    category_agent_df["acceptance_rate"] = (
-        category_agent_df["acceptance_rate"]
-        .replace([np.inf, -np.inf], np.nan)
-    )
-
-    pivot = category_agent_df.pivot(
-        index="option_category",
-        columns="agent",
-        values="acceptance_rate"
-    )
-
-    draw_heatmap(
-        pivot,
-        f"Option category acceptance by agent - {scenario_name}",
-        output_dir / f"{scenario_name}_option_category_agent_heatmap.png"
-    )
-
-
-def plot_overall_comparison(all_results_df, output_dir):
-    best_results = (
-        all_results_df.sort_values(
-            ["scenario", "top_k", "mean_reward"],
-            ascending=[True, True, False]
-        )
-        .groupby(["scenario", "top_k"])
-        .head(1)
-    )
-
-    labels = (
-            best_results["scenario"]
-            + " | k="
-            + best_results["top_k"].astype(str)
-    )
-
-    plt.figure(figsize=(12, 6))
-    plt.bar(labels, best_results["mean_reward"])
-    plt.xticks(rotation=45, ha="right")
-    plt.ylabel("Best mean acceptance reward")
-    plt.title("Best result by scenario and TOP-K")
-    plt.tight_layout()
-    plt.savefig(output_dir / "overall_best_results.png")
-    plt.close()
-
-
-def plot_overall_result_heatmap(all_results_df, output_dir):
-    best_by_agent = (
-        all_results_df
-        .sort_values("mean_reward", ascending=False)
-        .groupby(["scenario", "agent"], as_index=False)
-        .head(1)
-    )
-
-    pivot = best_by_agent.pivot(
-        index="scenario",
-        columns="agent",
-        values="mean_reward"
-    )
-
-    draw_heatmap(
-        pivot,
-        "Best mean reward by scenario and agent",
-        output_dir / "overall_best_reward_heatmap.png"
-    )
-
-
 def run_configured_scenarios(
     run_name,
     config_overrides,
@@ -973,25 +758,36 @@ def run_configured_scenarios(
 
     scenario_results = []
     scenario_option_results = []
+    scenario_position_results = []
+    scenario_run_results = []
 
     for scenario_name, restaurant_tiers in scenarios.items():
         scenario_dir = output_dir / scenario_name
         scenario_dir.mkdir()
 
-        results_df, option_results_df, restaurants_df, customers_df = run_scenario(
+        # zmena zacatek
+        (
+            results_df,
+            option_results_df,
+            restaurants_df,
+            customers_df,
+            position_results_df,
+            run_results_df,
+        ) = run_scenario(
             scenario_name,
             restaurant_tiers
         )
+        # zmena konec
 
         option_category_df = (
             option_results_df
             .groupby(["scenario", "option_category"], as_index=False)
-            [["shown_count", "accepted_count"]]
+            [["examined_count", "accepted_count"]]
             .sum()
         )
         option_category_df["acceptance_rate"] = (
                 option_category_df["accepted_count"]
-                / option_category_df["shown_count"]
+                / option_category_df["examined_count"]
         )
         option_category_df["acceptance_rate"] = (
             option_category_df["acceptance_rate"]
@@ -1002,6 +798,10 @@ def run_configured_scenarios(
             scenario_dir / "results.csv",
             index=False
         )
+        run_results_df.to_csv(
+            scenario_dir / "per_run_results.csv",
+            index=False,
+        )
         option_results_df.to_csv(
             scenario_dir / "options_detail.csv",
             index=False
@@ -1010,6 +810,12 @@ def run_configured_scenarios(
             scenario_dir / "options_by_category.csv",
             index=False
         )
+        # zmena zacatek
+        position_results_df.to_csv(
+            scenario_dir / "position_metrics.csv",
+            index=False
+        )
+        # zmena konec
         restaurants_df.to_csv(
             scenario_dir / "restaurants.csv",
             index=False
@@ -1018,75 +824,42 @@ def run_configured_scenarios(
             scenario_dir / "customer_sample.csv",
             index=False
         )
+        customers_df.to_csv(
+            scenario_dir / "customers.csv",
+            index=False
+        )
         customers_df.describe().to_csv(
             scenario_dir / "customer_summary.csv"
         )
 
-        save_pretty_table(
-            results_df,
-            scenario_dir / "results.html",
-            f"Results - {scenario_name}"
-        )
-        save_pretty_table(
-            option_category_df.sort_values(
-                "acceptance_rate",
-                ascending=False
-            ),
-            scenario_dir / "options_by_category.html",
-            f"Options by category - {scenario_name}"
-        )
-        save_pretty_table(
-            option_results_df.sort_values(
-                ["accepted_count", "acceptance_rate"],
-                ascending=False
-            ),
-            scenario_dir / "options_detail.html",
-            f"Options detail - {scenario_name}"
-        )
-
-        plot_scenario_results(results_df, scenario_name, scenario_dir)
-        plot_result_tables(results_df, scenario_name, scenario_dir)
-        plot_customer_sample(customers_df, scenario_name, scenario_dir)
-        plot_option_category_results(
-            option_results_df,
-            scenario_name,
-            scenario_dir
-        )
-        plot_top_options(option_results_df, scenario_name, scenario_dir)
-        plot_option_agent_heatmap(
-            option_results_df,
-            scenario_name,
-            scenario_dir
-        )
-
         scenario_results.append(results_df)
         scenario_option_results.append(option_results_df)
+        scenario_position_results.append(position_results_df)
+        scenario_run_results.append(run_results_df)
 
     all_results_df = pd.concat(scenario_results, ignore_index=True)
     all_option_results_df = pd.concat(
         scenario_option_results,
         ignore_index=True
     )
+    all_position_results_df = pd.concat(
+        scenario_position_results,
+        ignore_index=True
+    )
+    all_run_results_df = pd.concat(scenario_run_results, ignore_index=True)
     all_results_df.to_csv(output_dir / "all_results.csv", index=False)
     all_option_results_df.to_csv(
         output_dir / "all_options_detail.csv",
         index=False
     )
-    save_pretty_table(
-        all_results_df,
-        output_dir / "all_results.html",
-        "All scenario results"
+    all_position_results_df.to_csv(
+        output_dir / "all_position_metrics.csv",
+        index=False
     )
-    save_pretty_table(
-        all_option_results_df.sort_values(
-            ["scenario", "accepted_count", "acceptance_rate"],
-            ascending=[True, False, False]
-        ),
-        output_dir / "all_options_detail.html",
-        "All option results"
+    all_run_results_df.to_csv(
+        output_dir / "all_per_run_results.csv",
+        index=False,
     )
-    plot_overall_comparison(all_results_df, output_dir)
-    plot_overall_result_heatmap(all_results_df, output_dir)
 
     print("\nDONE")
     print(f"Outputs saved to: {output_dir.resolve()}")
