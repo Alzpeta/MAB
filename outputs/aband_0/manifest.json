@@ -1,0 +1,41 @@
+{
+  "experiment": "aband_0",
+  "sources": [
+    {
+      "key": "config",
+      "path": "outputs/aband_0/config_used.json",
+      "size_bytes": 12775,
+      "sha256": "27d011ee5344b42c568c5dccf0fbe8c087bf0a8a31e91d6c63e1669156830526"
+    },
+    {
+      "key": "options",
+      "path": "outputs/aband_0/all_options_detail.csv",
+      "size_bytes": 217735,
+      "sha256": "b6da5be4317a88082cc2478fd2b07f911282b2716b90ae29a0bf9a7401506ee1"
+    },
+    {
+      "key": "outcomes",
+      "path": "outputs/aband_0/all_customer_policy_outcomes.csv",
+      "size_bytes": 11715267190,
+      "sha256": "2cbf9fb12f677825dc7d27b0df7f41dadb9b49e4e235ff024b854b231f774cfa"
+    },
+    {
+      "key": "per_run",
+      "path": "outputs/aband_0/all_per_run_results.csv",
+      "size_bytes": 661301,
+      "sha256": "e0c0b6c6c90d5041f915749812e685a19907d7a2e43224f6ae57f88dbdc55af2"
+    },
+    {
+      "key": "positions",
+      "path": "outputs/aband_0/all_position_metrics.csv",
+      "size_bytes": 10904,
+      "sha256": "bcfbf79eb7395fc83b7959b173d7b3d7e822d7d5a79532040d26359aea8a77d6"
+    },
+    {
+      "key": "results",
+      "path": "outputs/aband_0/all_results.csv",
+      "size_bytes": 35680,
+      "sha256": "87e08e9aa3bf3cae0d16e47c85ab55dce3a0b99107a259ecb14e1d3da06e5417"
+    }
+  ]
+}
