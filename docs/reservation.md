@@ -149,7 +149,9 @@ Time flexibility is treated as a customer personality trait.
 The delay penalty is stronger when flexibility is low:
 
 ```python
-(1 - customer["time_flexibility"]) * (-normalized_shift)
+(1 - customer["time_flexibility"])
+* (-normalized_shift)
+* CONFIG["TIME_SHIFT_WEIGHT"]
 ```
 
 When the customer is fully flexible, almost nothing is subtracted for delay through this component.

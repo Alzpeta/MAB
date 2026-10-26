@@ -1,0 +1,41 @@
+{
+  "experiment": "noise_std_1-0",
+  "sources": [
+    {
+      "key": "config",
+      "path": "outputs/noise_std_1-0/config_used.json",
+      "size_bytes": 12671,
+      "sha256": "54065a839680194f57f098119d00f101110c5eed2c288521f30e3645839e4269"
+    },
+    {
+      "key": "options",
+      "path": "outputs/noise_std_1-0/all_options_detail.csv",
+      "size_bytes": 61733,
+      "sha256": "760c81ab9026e568c0b167b2581c7a3fd31e7c0241fcb4b37d65c8499e4280d9"
+    },
+    {
+      "key": "outcomes",
+      "path": "outputs/noise_std_1-0/all_customer_policy_outcomes.csv",
+      "size_bytes": 3202848140,
+      "sha256": "ae828da0427535360ecab281d9e278ac181d7bb93075396ecb7316477f40a1f7"
+    },
+    {
+      "key": "per_run",
+      "path": "outputs/noise_std_1-0/all_per_run_results.csv",
+      "size_bytes": 191091,
+      "sha256": "e428c6725f849398a374f62e049b0bec04d3e853560201496794f49f98fb5850"
+    },
+    {
+      "key": "positions",
+      "path": "outputs/noise_std_1-0/all_position_metrics.csv",
+      "size_bytes": 1689,
+      "sha256": "6286e40d91ae346a152d7c1711a3324fad0668235cf4146c010b63433fd32fec"
+    },
+    {
+      "key": "results",
+      "path": "outputs/noise_std_1-0/all_results.csv",
+      "size_bytes": 12369,
+      "sha256": "6fc094842e540aa4dfe740f05916cce76b63ee198b6338219b72bfeecb3ffa1e"
+    }
+  ]
+}

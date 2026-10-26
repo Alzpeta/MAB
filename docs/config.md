@@ -28,24 +28,25 @@ The main configuration is stored in `source/config.py` in the `CONFIG` dictionar
 
 #### `N_DAYS`
 
-- Default (Set) value: `7`
+- Default value: `7`
 - Number of simulated days.
 
 #### `OPEN_HOUR`
 
-- Default (Set) value: `11`
+- Default value: `11`
 - Restaurant opening hour.
 
 #### `CLOSE_HOUR`
 
-- Default (Set) value: `23`
+- Default value: `23`
 - Restaurant closing hour.
 
 #### `SLOTS_PER_HOUR`
 
-- Default (Set) value: `20`
+- Default value: `20`
 - Number of available reservation slots per hour.
-- **AP** The only time this number actually matters is with group size. But seems fair to me
+- Used by capacity checks for every reservation; the whole group must fit in
+  the remaining slots.
 
 ## Occupancy
 
