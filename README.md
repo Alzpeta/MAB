@@ -11,6 +11,7 @@ The model generates restaurants, customers, available reservation options, and t
 - [Restaurants and Options](docs/restaurants_and_options.md)
 - [Reservation](docs/reservation.md)
 - [Agent Description](docs/agent_description.md)
+- [Experiments](docs/experiments.md)
 
 ## Main Files
 
@@ -26,3 +27,4 @@ The model generates restaurants, customers, available reservation options, and t
 ## Outputs
 
 Experiment outputs are written into `outputs/`.
+

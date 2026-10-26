@@ -186,7 +186,8 @@ def parse_args():
         "--requested-experiments",
         action="store_true",
         help=(
-            "Run all predefined requested experiments one after another."
+            "Run all requested experiments from docs/experiments.md "
+            "one after another."
         ),
     )
 
