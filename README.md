@@ -11,7 +11,6 @@ The model generates restaurants, customers, available reservation options, and t
 - [Restaurants and Options](docs/restaurants_and_options.md)
 - [Reservation](docs/reservation.md)
 - [Agent Description](docs/agent_description.md)
-- [Experiments](docs/experiments.md)
 
 ## Main Files
 
@@ -32,5 +31,5 @@ restaurant data, the complete generated customer dataset, a 200-row customer
 sample, and descriptive customer statistics. The run configuration remains in
 `config_used.json` so its nested structure is preserved for reproducibility.
 
-The runner does not generate charts or HTML reports. All data needed to create
-them separately is retained in the CSV and JSON outputs.
+Included reports are in `outputs/reports/`, with figures, CSV tables, and
+scenario manifests. The runner itself does not generate charts or HTML reports.

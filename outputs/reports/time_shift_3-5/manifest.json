@@ -1,0 +1,41 @@
+{
+  "experiment": "time_shift_3-5",
+  "sources": [
+    {
+      "key": "config",
+      "path": "outputs/time_shift_3-5/config_used.json",
+      "size_bytes": 12683,
+      "sha256": "4eb3f8e570cc7cd43cc8232b013e503b9bf9dcfc9e385fc1815a8ed3b6ea6317"
+    },
+    {
+      "key": "options",
+      "path": "outputs/time_shift_3-5/all_options_detail.csv",
+      "size_bytes": 61699,
+      "sha256": "0d27c9114d3b515d3762443d6dabfa4cfc2346ea9b7e859b13ac0e3c385058b5"
+    },
+    {
+      "key": "outcomes",
+      "path": "outputs/time_shift_3-5/all_customer_policy_outcomes.csv",
+      "size_bytes": 3155341213,
+      "sha256": "09deeeab633d20edd59db7b1551a2ac1589f2f101bf327948d62612b8c86d46d"
+    },
+    {
+      "key": "per_run",
+      "path": "outputs/time_shift_3-5/all_per_run_results.csv",
+      "size_bytes": 190807,
+      "sha256": "b25ca07166d107d94e4e0a06f99215df6ecdc81d7dcb998dde667d733c92e37d"
+    },
+    {
+      "key": "positions",
+      "path": "outputs/time_shift_3-5/all_position_metrics.csv",
+      "size_bytes": 1690,
+      "sha256": "fd89a4e06e35f78c11f0ce9b3f622f80837342f5fe75a78b0af5d64298486a16"
+    },
+    {
+      "key": "results",
+      "path": "outputs/time_shift_3-5/all_results.csv",
+      "size_bytes": 12388,
+      "sha256": "f61121668e8d9113df3f74dc48922595af4fd08380cc89e9dd0892b9f5fd0d47"
+    }
+  ]
+}

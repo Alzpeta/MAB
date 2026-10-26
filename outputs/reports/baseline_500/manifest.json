@@ -1,0 +1,41 @@
+{
+  "experiment": "baseline_500",
+  "sources": [
+    {
+      "key": "config",
+      "path": "outputs/baseline_500/config_used.json",
+      "size_bytes": 12739,
+      "sha256": "7a0fbf1a102f855e663cbf429270db1d796894259f7581d3fc4f1d5d43d64b7f"
+    },
+    {
+      "key": "options",
+      "path": "outputs/baseline_500/all_options_detail.csv",
+      "size_bytes": 205230,
+      "sha256": "0b1554c12d1e407849810a0060c473ab3e333aeaae1e1499ce64cfec88b2878e"
+    },
+    {
+      "key": "outcomes",
+      "path": "outputs/baseline_500/all_customer_policy_outcomes.csv",
+      "size_bytes": 278940027,
+      "sha256": "4d651071b187fe68ca1874cc615039815527420ce65675079e2e5e52efa96b2c"
+    },
+    {
+      "key": "per_run",
+      "path": "outputs/baseline_500/all_per_run_results.csv",
+      "size_bytes": 575133,
+      "sha256": "84b3506b8d7287706097b0746e1771511990c441dae45feeae6f4eda91f1e11c"
+    },
+    {
+      "key": "positions",
+      "path": "outputs/baseline_500/all_position_metrics.csv",
+      "size_bytes": 10460,
+      "sha256": "a64ee4c742f05a3f5331aae10371ce42402019dd780a83b8135072b12a426f61"
+    },
+    {
+      "key": "results",
+      "path": "outputs/baseline_500/all_results.csv",
+      "size_bytes": 41628,
+      "sha256": "c862098ecdc90b3d8acae96b2597fe83bcf0e55b7437fb8a6edabd266a814f11"
+    }
+  ]
+}
